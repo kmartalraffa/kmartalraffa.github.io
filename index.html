@@ -126,25 +126,61 @@
             </div>
 
             <div
-                class="bg-white p-6 rounded-xl shadow-sm border border-slate-200"
+                class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4"
             >
-                <label class="block text-sm font-semibold text-slate-700 mb-2"
-                    >Scan Barcode or Type ID</label
-                >
-                <div class="relative">
-                    <i
-                        data-lucide="search"
-                        class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5"
-                    ></i>
-                    <input
-                        id="search-input"
-                        type="text"
-                        placeholder="e.g. 8906078..."
-                        class="w-full pl-10 pr-4 py-3 text-lg border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-300 font-mono"
-                        oninput="handleSearch()"
-                        autofocus
-                    />
+                <div>
+                    <label
+                        class="block text-sm font-semibold text-slate-700 mb-2"
+                        >Scan Barcode (Exact Match)</label
+                    >
+                    <div class="relative">
+                        <i
+                            data-lucide="barcode"
+                            class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5"
+                        ></i>
+                        <input
+                            id="id-search-input"
+                            type="text"
+                            inputmode="numeric"
+                            pattern="[0-9]*"
+                            placeholder="e.g. 9900114..."
+                            class="w-full pl-10 pr-4 py-3 text-lg border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-300 font-mono"
+                            oninput="handleSearch()"
+                            autofocus
+                        />
+                    </div>
                 </div>
+
+                <div class="relative flex justify-center items-center py-2">
+                    <div
+                        class="absolute inset-0 border-t border-slate-200"
+                    ></div>
+                    <span
+                        class="relative bg-white px-3 text-xs text-slate-400 font-medium"
+                        >OR</span
+                    >
+                </div>
+
+                <div>
+                    <label
+                        class="block text-sm font-semibold text-slate-700 mb-2"
+                        >Search by Product Name (Type to find)</label
+                    >
+                    <div class="relative">
+                        <i
+                            data-lucide="tag"
+                            class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5"
+                        ></i>
+                        <input
+                            id="name-search-input"
+                            type="text"
+                            placeholder="e.g. tom"
+                            class="w-full pl-10 pr-4 py-3 text-lg border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-300"
+                            oninput="handleSearch()"
+                        />
+                    </div>
+                </div>
+
                 <p
                     id="search-status"
                     class="text-center text-xs text-slate-400 mt-3"
@@ -157,7 +193,7 @@
                 <h3
                     class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1"
                 >
-                    Search Result
+                    Details for Selected Item
                 </h3>
 
                 <div
@@ -165,7 +201,7 @@
                 >
                     <div class="bg-blue-50 p-4 border-b border-blue-100">
                         <p class="text-xs font-bold text-blue-600 mb-1">
-                            MATCH FOUND
+                            ITEM DETAILS
                         </p>
                         <h2
                             id="result-title"
@@ -181,6 +217,18 @@
                 </div>
             </div>
 
+            <div id="list-container" class="hidden space-y-2 fade-in">
+                <h3
+                    class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1"
+                >
+                    Multiple Matches Found
+                </h3>
+                <div
+                    id="match-list"
+                    class="bg-white rounded-xl shadow-lg border border-slate-200 divide-y divide-slate-100"
+                ></div>
+            </div>
+
             <div id="no-result" class="hidden space-y-2 fade-in">
                 <div
                     class="bg-white p-8 rounded-xl border border-dashed border-slate-300 text-center text-slate-400"
@@ -190,7 +238,7 @@
                         class="mx-auto mb-2 opacity-50 w-8 h-8"
                     ></i>
                     <p>
-                        No product found with ID "<span
+                        No product found matching term "<span
                             id="no-match-term"
                         ></span
                         >"
@@ -255,54 +303,140 @@
                 }
             }
 
+            // Function to display the details of a single item
+            function displayItemDetails(match) {
+                document
+                    .getElementById("list-container")
+                    .classList.add("hidden");
+                document.getElementById("no-result").classList.add("hidden");
+                document
+                    .getElementById("result-container")
+                    .classList.remove("hidden");
+
+                // Use the second column (Name) for the main title display
+                document.getElementById("result-title").innerText =
+                    Object.values(match)[1];
+
+                // Build Details HTML
+                let html = "";
+                headers.forEach((header, index) => {
+                    const val = match[header];
+                    if (!val && val !== 0) return; // Skip empty
+
+                    // Customize display for the Barcode/ID column (first column, index 0)
+                    const valueDisplay =
+                        index === 0
+                            ? `<span class="font-mono text-sm bg-slate-100 px-2 py-1 rounded">${val}</span>`
+                            : val;
+
+                    html += `
+                    <div class="py-3 grid grid-cols-3 gap-4">
+                        <span class="text-sm font-medium text-slate-500 col-span-1 self-center">${header}</span>
+                        <span class="text-sm font-semibold text-slate-800 col-span-2 break-words">${valueDisplay}</span>
+                    </div>
+                `;
+                });
+                document.getElementById("result-details").innerHTML = html;
+            }
+
             function handleSearch() {
-                const term = document
-                    .getElementById("search-input")
+                const idTerm = document
+                    .getElementById("id-search-input")
                     .value.trim()
                     .toLowerCase();
+                const nameTerm = document
+                    .getElementById("name-search-input")
+                    .value.trim()
+                    .toLowerCase();
+
                 const resultContainer =
                     document.getElementById("result-container");
+                const listContainer = document.getElementById("list-container");
                 const noResultContainer = document.getElementById("no-result");
-                const resultDetails = document.getElementById("result-details");
-                const resultTitle = document.getElementById("result-title");
+                const searchStatus = document.getElementById("search-status");
 
-                if (!term || inventory.length === 0) {
-                    resultContainer.classList.add("hidden");
-                    noResultContainer.classList.add("hidden");
+                // Clear previous results
+                resultContainer.classList.add("hidden");
+                listContainer.classList.add("hidden");
+                noResultContainer.classList.add("hidden");
+
+                let term = "";
+                let matches = [];
+
+                if (idTerm.length > 0) {
+                    term = idTerm;
+                    document.getElementById("name-search-input").value = ""; // Clear other box
+                    searchStatus.innerText = `Searching for exact ID "${term}"...`;
+
+                    // Exact match search on Barcode (column 0)
+                    const exactMatch = inventory.find((row) => {
+                        const values = Object.values(row);
+                        return String(values[0]).toLowerCase() === term;
+                    });
+                    if (exactMatch) matches.push(exactMatch);
+                } else if (nameTerm.length > 0) {
+                    term = nameTerm;
+                    document.getElementById("id-search-input").value = ""; // Clear other box
+                    searchStatus.innerText = `Searching for product containing "${term}"...`;
+
+                    // Substring search on Product Name (column 1)
+                    matches = inventory.filter((row) => {
+                        const values = Object.values(row);
+                        // Ensure there is a second column before checking includes
+                        return (
+                            values.length > 1 &&
+                            String(values[1]).toLowerCase().includes(term)
+                        );
+                    });
+                } else {
+                    // No term entered
+                    if (inventory.length > 0) {
+                        searchStatus.innerText = `Ready to search ${inventory.length.toLocaleString()} records`;
+                    }
                     return;
                 }
 
-                // Search logic: strictly check first column
-                const match = inventory.find((row) => {
-                    const values = Object.values(row);
-                    return String(values[0]).toLowerCase() === term;
-                });
+                // --- Display Results ---
 
-                if (match) {
-                    noResultContainer.classList.add("hidden");
-                    resultContainer.classList.remove("hidden");
+                if (matches.length === 1) {
+                    // Single exact match (from either search type)
+                    displayItemDetails(matches[0]);
+                    searchStatus.innerText = `Found result for "${term}"`;
+                } else if (matches.length > 1) {
+                    // Multiple matches from the substring search
+                    listContainer.classList.remove("hidden");
+                    const matchList = document.getElementById("match-list");
+                    matchList.innerHTML = "";
 
-                    // Set Title (First column value)
-                    resultTitle.innerText = Object.values(match)[0];
+                    matches.forEach((match) => {
+                        const name = Object.values(match)[1];
+                        const barcode = Object.values(match)[0];
 
-                    // Build Details HTML
-                    let html = "";
-                    headers.slice(1).forEach((header) => {
-                        const val = match[header];
-                        if (!val && val !== 0) return; // Skip empty
-
-                        html += `
-                        <div class="py-3 grid grid-cols-3 gap-4">
-                            <span class="text-sm font-medium text-slate-500 col-span-1 self-center">${header}</span>
-                            <span class="text-sm font-semibold text-slate-800 col-span-2 break-words">${val}</span>
-                        </div>
-                    `;
+                        const listItem = document.createElement("div");
+                        listItem.className =
+                            "p-4 flex justify-between items-center hover:bg-slate-50 cursor-pointer transition-colors";
+                        listItem.innerHTML = `
+                            <div>
+                                <p class="font-semibold text-slate-800">${name}</p>
+                                <p class="text-xs text-slate-400 font-mono">${barcode}</p>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+                        `;
+                        // Attach the click handler to view details
+                        listItem.onclick = () => {
+                            displayItemDetails(match);
+                            lucide.createIcons(); // Re-render icons after DOM modification
+                        };
+                        matchList.appendChild(listItem);
                     });
-                    resultDetails.innerHTML = html;
+
+                    lucide.createIcons(); // Re-render icons after DOM modification
+                    searchStatus.innerText = `${matches.length} matches found for "${term}"`;
                 } else {
-                    resultContainer.classList.add("hidden");
-                    noResultContainer.classList.remove("hidden");
+                    // No matches
                     document.getElementById("no-match-term").innerText = term;
+                    noResultContainer.classList.remove("hidden");
+                    searchStatus.innerText = `No match found for "${term}"`;
                 }
             }
 
