@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Inventory Scanner</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://unpkg.com/lucide@latest"></script>
+        <style>
+            /* Custom scrollbar for cleaner look */
+            ::-webkit-scrollbar {
+                width: 8px;
+            }
+            ::-webkit-scrollbar-track {
+                background: #f1f5f9;
+            }
+            ::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 4px;
+            }
+            ::-webkit-scrollbar-thumb:hover {
+                background: #94a3b8;
+            }
+            .fade-in {
+                animation: fadeIn 0.3s ease-out;
+            }
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(5px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        </style>
+    </head>
+    <body class="bg-gray-100 min-h-screen font-sans text-slate-800 p-4">
+        <div class="max-w-md mx-auto space-y-4">
+            <div
+                class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between"
+            >
+                <div class="flex items-center gap-3">
+                    <div class="bg-blue-600 p-2 rounded-lg text-white">
+                        <i data-lucide="barcode" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight">
+                            Inventory Scanner
+                        </h1>
+                        <p id="status-text" class="text-xs text-slate-500">
+                            Waiting to sync...
+                        </p>
+                    </div>
+                </div>
+                <button
+                    onclick="toggleSettings()"
+                    class="p-2 hover:bg-slate-100 rounded-full text-slate-400 transition-colors"
+                >
+                    <i data-lucide="settings" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div
+                id="error-banner"
+                class="hidden bg-red-50 text-red-700 p-4 rounded-xl border border-red-200 text-sm flex gap-3 items-start"
+            >
+                <i
+                    data-lucide="alert-circle"
+                    class="shrink-0 mt-0.5 w-5 h-5"
+                ></i>
+                <div>
+                    <p class="font-semibold">Connection Error</p>
+                    <p id="error-msg">Unknown error</p>
+                    <button
+                        onclick="fetchData()"
+                        class="mt-2 px-3 py-1 bg-red-100 hover:bg-red-200 text-red-800 rounded-md text-xs font-medium transition-colors"
+                    >
+                        Retry Connection
+                    </button>
+                </div>
+            </div>
+
+            <div
+                id="settings-panel"
+                class="hidden bg-white p-4 rounded-xl shadow-sm border border-slate-200 fade-in"
+            >
+                <h3 class="font-semibold text-sm mb-3 flex items-center gap-2">
+                    <i data-lucide="database" class="w-4 h-4"></i> Data Source
+                    Configuration
+                </h3>
+                <div class="space-y-3">
+                    <div>
+                        <label
+                            class="block text-xs font-medium text-slate-500 mb-1"
+                            >Sheet ID</label
+                        >
+                        <input
+                            id="sheet-id"
+                            type="text"
+                            value="1eEFtb7wxOOLw-TFTf_NvSFq1VQy1qYlMoVmiZkFgUys"
+                            class="w-full text-xs p-2 border rounded bg-slate-50 font-mono"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            class="block text-xs font-medium text-slate-500 mb-1"
+                            >GID (Tab ID)</label
+                        >
+                        <input
+                            id="gid-id"
+                            type="text"
+                            value="710656272"
+                            class="w-full text-xs p-2 border rounded bg-slate-50 font-mono"
+                        />
+                    </div>
+                    <button
+                        onclick="fetchData()"
+                        class="w-full py-2 bg-slate-800 text-white rounded-lg text-sm hover:bg-slate-900 flex items-center justify-center gap-2"
+                    >
+                        <i data-lucide="refresh-cw" class="w-3 h-3"></i> Reload
+                        Data
+                    </button>
+                </div>
+            </div>
+
+            <div
+                class="bg-white p-6 rounded-xl shadow-sm border border-slate-200"
+            >
+                <label class="block text-sm font-semibold text-slate-700 mb-2"
+                    >Scan Barcode or Type ID</label
+                >
+                <div class="relative">
+                    <i
+                        data-lucide="search"
+                        class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5"
+                    ></i>
+                    <input
+                        id="search-input"
+                        type="text"
+                        placeholder="e.g. 8906078..."
+                        class="w-full pl-10 pr-4 py-3 text-lg border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-300 font-mono"
+                        oninput="handleSearch()"
+                        autofocus
+                    />
+                </div>
+                <p
+                    id="search-status"
+                    class="text-center text-xs text-slate-400 mt-3"
+                >
+                    Waiting for data...
+                </p>
+            </div>
+
+            <div id="result-container" class="hidden space-y-2 fade-in">
+                <h3
+                    class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1"
+                >
+                    Search Result
+                </h3>
+
+                <div
+                    class="bg-white rounded-xl shadow-lg border border-blue-100 overflow-hidden"
+                >
+                    <div class="bg-blue-50 p-4 border-b border-blue-100">
+                        <p class="text-xs font-bold text-blue-600 mb-1">
+                            MATCH FOUND
+                        </p>
+                        <h2
+                            id="result-title"
+                            class="text-xl font-bold text-slate-800 font-mono"
+                        >
+                            Product Name
+                        </h2>
+                    </div>
+                    <div
+                        id="result-details"
+                        class="p-4 divide-y divide-slate-100"
+                    ></div>
+                </div>
+            </div>
+
+            <div id="no-result" class="hidden space-y-2 fade-in">
+                <div
+                    class="bg-white p-8 rounded-xl border border-dashed border-slate-300 text-center text-slate-400"
+                >
+                    <i
+                        data-lucide="package"
+                        class="mx-auto mb-2 opacity-50 w-8 h-8"
+                    ></i>
+                    <p>
+                        No product found with ID "<span
+                            id="no-match-term"
+                        ></span
+                        >"
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // --- State ---
+            let inventory = [];
+            let headers = [];
+
+            // --- Initialization ---
+            lucide.createIcons();
+            fetchData();
+
+            // --- Core Functions ---
+
+            async function fetchData() {
+                const sheetId = document.getElementById("sheet-id").value;
+                const gid = document.getElementById("gid-id").value;
+                const statusText = document.getElementById("status-text");
+                const errorBanner = document.getElementById("error-banner");
+
+                // UI Reset
+                statusText.innerText = "Syncing...";
+                errorBanner.classList.add("hidden");
+                inventory = [];
+
+                try {
+                    const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+                    const response = await fetch(csvUrl);
+
+                    if (!response.ok)
+                        throw new Error(
+                            `Failed to fetch. Status: ${response.status}`
+                        );
+
+                    const text = await response.text();
+                    const parsedData = parseCSV(text);
+
+                    if (parsedData.length === 0)
+                        throw new Error("Sheet appears to be empty.");
+
+                    // Assume first row keys are headers
+                    inventory = parsedData;
+                    headers = Object.keys(parsedData[0]);
+
+                    statusText.innerText = `${inventory.length.toLocaleString()} items loaded`;
+                    document.getElementById(
+                        "search-status"
+                    ).innerText = `Ready to search ${inventory.length.toLocaleString()} records`;
+
+                    // Re-run search if there is text
+                    handleSearch();
+                } catch (err) {
+                    statusText.innerText = "Error syncing";
+                    document.getElementById("error-msg").innerText =
+                        err.message;
+                    errorBanner.classList.remove("hidden");
+                }
+            }
+
+            function handleSearch() {
+                const term = document
+                    .getElementById("search-input")
+                    .value.trim()
+                    .toLowerCase();
+                const resultContainer =
+                    document.getElementById("result-container");
+                const noResultContainer = document.getElementById("no-result");
+                const resultDetails = document.getElementById("result-details");
+                const resultTitle = document.getElementById("result-title");
+
+                if (!term || inventory.length === 0) {
+                    resultContainer.classList.add("hidden");
+                    noResultContainer.classList.add("hidden");
+                    return;
+                }
+
+                // Search logic: strictly check first column
+                const match = inventory.find((row) => {
+                    const values = Object.values(row);
+                    return String(values[0]).toLowerCase() === term;
+                });
+
+                if (match) {
+                    noResultContainer.classList.add("hidden");
+                    resultContainer.classList.remove("hidden");
+
+                    // Set Title (First column value)
+                    resultTitle.innerText = Object.values(match)[0];
+
+                    // Build Details HTML
+                    let html = "";
+                    headers.slice(1).forEach((header) => {
+                        const val = match[header];
+                        if (!val && val !== 0) return; // Skip empty
+
+                        html += `
+                        <div class="py-3 grid grid-cols-3 gap-4">
+                            <span class="text-sm font-medium text-slate-500 col-span-1 self-center">${header}</span>
+                            <span class="text-sm font-semibold text-slate-800 col-span-2 break-words">${val}</span>
+                        </div>
+                    `;
+                    });
+                    resultDetails.innerHTML = html;
+                } else {
+                    resultContainer.classList.add("hidden");
+                    noResultContainer.classList.remove("hidden");
+                    document.getElementById("no-match-term").innerText = term;
+                }
+            }
+
+            function toggleSettings() {
+                const panel = document.getElementById("settings-panel");
+                panel.classList.toggle("hidden");
+            }
+
+            // --- Helper: CSV Parser (Same robust logic) ---
+            function parseCSV(text) {
+                const lines = text.split(/\r?\n/);
+                if (lines.length < 2) return [];
+
+                const headers = splitCSVLine(lines[0]);
+                const result = [];
+
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+
+                    const values = splitCSVLine(line);
+                    const entry = {};
+
+                    headers.forEach((header, index) => {
+                        entry[header.trim()] = values[index]
+                            ? values[index].trim()
+                            : "";
+                    });
+                    result.push(entry);
+                }
+                return result;
+            }
+
+            function splitCSVLine(line) {
+                const values = [];
+                let current = "";
+                let inQuotes = false;
+
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === "," && !inQuotes) {
+                        values.push(current);
+                        current = "";
+                    } else {
+                        current += char;
+                    }
+                }
+                values.push(current);
+                return values;
+            }
+        </script>
+    </body>
+</html>
