@@ -54,12 +54,6 @@
                         </p>
                     </div>
                 </div>
-                <button
-                    onclick="toggleSettings()"
-                    class="p-2 hover:bg-slate-100 rounded-full text-slate-400 transition-colors"
-                >
-                    <i data-lucide="settings" class="w-5 h-5"></i>
-                </button>
             </div>
 
             <div
@@ -100,7 +94,8 @@
                             id="sheet-id"
                             type="text"
                             value="1eEFtb7wxOOLw-TFTf_NvSFq1VQy1qYlMoVmiZkFgUys"
-                            class="w-full text-xs p-2 border rounded bg-slate-50 font-mono"
+                            class="w-full text-xs p-2 border rounded bg-slate-50 font-mono text-slate-500 cursor-not-allowed"
+                            disabled
                         />
                     </div>
                     <div>
@@ -112,7 +107,8 @@
                             id="gid-id"
                             type="text"
                             value="710656272"
-                            class="w-full text-xs p-2 border rounded bg-slate-50 font-mono"
+                            class="w-full text-xs p-2 border rounded bg-slate-50 font-mono text-slate-500 cursor-not-allowed"
+                            disabled
                         />
                     </div>
                     <button
@@ -164,7 +160,7 @@
                 <div>
                     <label
                         class="block text-sm font-semibold text-slate-700 mb-2"
-                        >Search by Product Name (Type to find)</label
+                        >Search by Product Name (Min 3 Chars)</label
                     >
                     <div class="relative">
                         <i
@@ -259,6 +255,7 @@
             // --- Core Functions ---
 
             async function fetchData() {
+                // Sheet ID and GID are read from the disabled/hidden inputs
                 const sheetId = document.getElementById("sheet-id").value;
                 const gid = document.getElementById("gid-id").value;
                 const statusText = document.getElementById("status-text");
@@ -364,6 +361,7 @@
                 let matches = [];
 
                 if (idTerm.length > 0) {
+                    // --- ID (Barcode) Search: Exact Match ---
                     term = idTerm;
                     document.getElementById("name-search-input").value = ""; // Clear other box
                     searchStatus.innerText = `Searching for exact ID "${term}"...`;
@@ -375,6 +373,13 @@
                     });
                     if (exactMatch) matches.push(exactMatch);
                 } else if (nameTerm.length > 0) {
+                    // --- Name Search: Substring Match ---
+
+                    if (nameTerm.length < 3) {
+                        searchStatus.innerText = `Type at least 3 characters to search product names.`;
+                        return;
+                    }
+
                     term = nameTerm;
                     document.getElementById("id-search-input").value = ""; // Clear other box
                     searchStatus.innerText = `Searching for product containing "${term}"...`;
@@ -440,10 +445,7 @@
                 }
             }
 
-            function toggleSettings() {
-                const panel = document.getElementById("settings-panel");
-                panel.classList.toggle("hidden");
-            }
+            // Removed toggleSettings function
 
             // --- Helper: CSV Parser (Same robust logic) ---
             function parseCSV(text) {
