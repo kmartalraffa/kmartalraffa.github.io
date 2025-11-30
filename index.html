@@ -170,7 +170,7 @@
                         <input
                             id="name-search-input"
                             type="text"
-                            placeholder="e.g. tom"
+                            placeholder="e.g. noor 1.5"
                             class="w-full pl-10 pr-4 py-3 text-lg border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-300"
                             oninput="handleSearch()"
                         />
@@ -373,7 +373,7 @@
                     });
                     if (exactMatch) matches.push(exactMatch);
                 } else if (nameTerm.length > 0) {
-                    // --- Name Search: Substring Match ---
+                    // --- Name Search: Multi-Term Substring Match (UPDATED LOGIC) ---
 
                     if (nameTerm.length < 3) {
                         searchStatus.innerText = `Type at least 3 characters to search product names.`;
@@ -382,15 +382,24 @@
 
                     term = nameTerm;
                     document.getElementById("id-search-input").value = ""; // Clear other box
-                    searchStatus.innerText = `Searching for product containing "${term}"...`;
+                    searchStatus.innerText = `Searching for product matching tokens: "${term}"...`;
 
-                    // Substring search on Product Name (column 1)
+                    // Tokenize the search term (split by space)
+                    const searchTokens = nameTerm
+                        .split(/\s+/)
+                        .filter((token) => token.length > 0);
+
+                    // Filter inventory where ALL tokens are included in the product name (column 1)
                     matches = inventory.filter((row) => {
                         const values = Object.values(row);
-                        // Ensure there is a second column before checking includes
+                        const productName = String(values[1]).toLowerCase();
+
+                        // Check if the product name includes ALL search tokens
                         return (
                             values.length > 1 &&
-                            String(values[1]).toLowerCase().includes(term)
+                            searchTokens.every((token) =>
+                                productName.includes(token)
+                            )
                         );
                     });
                 } else {
@@ -444,8 +453,6 @@
                     searchStatus.innerText = `No match found for "${term}"`;
                 }
             }
-
-            // Removed toggleSettings function
 
             // --- Helper: CSV Parser (Same robust logic) ---
             function parseCSV(text) {
