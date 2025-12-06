@@ -8,30 +8,61 @@
         <script src="https://unpkg.com/lucide@latest"></script>
         <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
         <style>
-            /* Custom Scrollbar */
+            /* Scrollbar Styling */
             ::-webkit-scrollbar { width: 6px; }
             ::-webkit-scrollbar-track { background: #f1f5f9; }
             ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
             .fade-in { animation: fadeIn 0.3s ease-out; }
             @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
             
-            /* Camera Container Styling - Restricting height */
+            /* --- CAMERA STRIP STYLING (IMPORTANT) --- */
             #reader-container {
-                max-height: 180px; /* Limits the visible camera area height */
+                position: relative;
+                width: 100%;
+                height: 200px; /* Fixed height for strip view */
                 overflow: hidden;
+                border-radius: 1rem;
+                border: 2px solid #1e293b;
+                background: black;
             }
             
-            /* Camera Element */
             #reader { 
                 width: 100%; 
-                background: black;
-                /* Adjust positioning to center the relevant part */
-                margin-top: -50px; 
+                height: 100%; 
             }
+            
+            /* Force the video to fill the strip completely */
             #reader video { 
-                object-fit: cover; 
-                height: 250px !important; /* Force video height to fill */
+                width: 100% !important;
+                height: 200px !important; /* Match container height */
+                object-fit: cover !important; /* Crop top/bottom to make it a strip */
             }
+
+            /* Custom Red Scanning Box Overlay */
+            .scan-overlay {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 85%;
+                height: 80px; /* Height of the red box */
+                border: 2px solid rgba(239, 68, 68, 0.8); /* Red Border */
+                box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5); /* Darken outside area */
+                border-radius: 8px;
+                pointer-events: none;
+                z-index: 10;
+            }
+            
+            /* Scanning Line Animation */
+            .scan-line {
+                width: 100%;
+                height: 2px;
+                background: #ef4444;
+                position: absolute;
+                top: 0;
+                animation: scanMove 2s infinite linear;
+            }
+            @keyframes scanMove { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
         </style>
     </head>
     <body class="bg-slate-50 min-h-screen font-sans text-slate-800 p-3 md:p-6">
@@ -42,7 +73,7 @@
                     <i data-lucide="store" class="w-7 h-7"></i>
                 </div>
                 <div>
-                    <h1 class="font-extrabold text-xl text-slate-900 leading-tight tracking-tight">K MART AL RAFFA</h1>
+                    <h1 class="font-extrabold text-xl text-slate-900 leading-tight">K MART AL RAFFA</h1>
                     <p class="text-sm font-medium text-blue-600">Item Master</p>
                 </div>
             </div>
@@ -53,12 +84,16 @@
             </div>
             <p id="status-text" class="text-center text-xs font-medium text-slate-500 bg-white py-1.5 rounded-full border border-slate-100 shadow-sm">Initializing...</p>
 
-            <div id="reader-container" class="hidden bg-black rounded-2xl border-4 border-slate-900 shadow-2xl fade-in relative">
+            <div id="reader-container" class="hidden fade-in">
                     <div id="reader"></div>
+                    
+                    <div class="scan-overlay">
+                        <div class="scan-line"></div>
+                    </div>
+
                     <button onclick="stopCamera()" class="absolute top-2 right-2 bg-white/20 backdrop-blur-md p-1.5 rounded-full text-white hover:bg-white/30 z-20">
-                    <i data-lucide="x" class="w-4 h-4"></i>
+                        <i data-lucide="x" class="w-4 h-4"></i>
                     </button>
-                    <div class="absolute top-1/2 left-0 right-0 border-t-2 border-red-500/50 pointer-events-none z-10 transform -translate-y-1/2"></div>
             </div>
 
             <div class="bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-slate-100 space-y-5">
@@ -137,11 +172,12 @@
 
                 html5QrCode = new Html5Qrcode("reader");
                 
-                // ADJUSTED CONFIG FOR WIDE RECTANGULAR SCANNING
+                // --- STRIP SCANNER CONFIG ---
                 const config = { 
                     fps: 25, 
-                    qrbox: { width: 300, height: 100 }, // WIDE AND SHORT BOX
-                    aspectRatio: 1.77, // 16:9 Aspect ratio to fill width
+                    // Set qrbox to match the visual strip overlay
+                    qrbox: { width: 280, height: 80 }, 
+                    aspectRatio: 1.0, 
                     experimentalFeatures: { useBarCodeDetectorIfSupported: true }
                 };
                 
@@ -185,18 +221,13 @@
                     const response = await fetch(csvUrl);
                     if (!response.ok) throw new Error("Net Error");
                     const text = await response.text();
-                    
                     if(text.includes("<!DOCTYPE html>")) throw new Error("Check Permissions");
-
                     const parsedData = parseCSV(text);
                     if (parsedData.length === 0) throw new Error("Empty Sheet");
-
                     inventory = parsedData;
                     headers = Object.keys(parsedData[0]);
-
                     statusText.innerText = `✅ Ready: ${inventory.length.toLocaleString()} Items`;
                     statusText.classList.add("text-green-600");
-                    
                 } catch (err) {
                     statusText.innerText = "❌ Sync Failed";
                     statusText.classList.add("text-red-600");
