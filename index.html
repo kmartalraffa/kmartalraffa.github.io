@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Inventory Scanner V2</title>
+        <title>Fast Scanner V3</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <script src="https://unpkg.com/lucide@latest"></script>
         <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -12,19 +12,21 @@
             ::-webkit-scrollbar-track { background: #f1f5f9; }
             ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
             .fade-in { animation: fadeIn 0.3s ease-out; }
-            @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
             #reader { width: 100%; border-radius: 0.75rem; overflow: hidden; background: black; }
+            /* Scanning line animation */
+            .scan-region-highlight { border-color: #3b82f6 !important; }
         </style>
     </head>
     <body class="bg-gray-100 min-h-screen font-sans text-slate-800 p-4">
         <div class="max-w-md mx-auto space-y-4">
+            
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="bg-blue-600 p-2 rounded-lg text-white">
-                        <i data-lucide="scan-line" class="w-6 h-6"></i>
+                        <i data-lucide="zap" class="w-6 h-6"></i>
                     </div>
                     <div>
-                        <h1 class="font-bold text-lg leading-tight">Inventory Scanner</h1>
+                        <h1 class="font-bold text-lg leading-tight">Fast Inventory</h1>
                         <p id="status-text" class="text-xs text-slate-500">Initializing...</p>
                     </div>
                 </div>
@@ -40,7 +42,7 @@
                 <div id="camera-section" class="space-y-2">
                     <button id="camera-toggle-btn" onclick="toggleCamera()" class="w-full py-3 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 shadow-md flex items-center justify-center gap-2 transition-all active:scale-95">
                         <i data-lucide="camera" class="w-5 h-5"></i>
-                        Open Camera to Scan
+                        Open Scanner (Fast Mode)
                     </button>
                     
                     <div id="reader-container" class="hidden bg-black rounded-xl overflow-hidden relative border-4 border-slate-800">
@@ -48,37 +50,36 @@
                          <button onclick="stopCamera()" class="absolute top-2 right-2 bg-white/90 p-2 rounded-full text-red-600 shadow-lg z-10">
                             <i data-lucide="x" class="w-5 h-5"></i>
                          </button>
-                         <p class="text-white text-xs text-center p-2">Point camera at a barcode</p>
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-2">Scan or Type Barcode</label>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Barcode / ID</label>
                     <div class="relative">
                         <i data-lucide="barcode" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5"></i>
-                        <input id="id-search-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Scan result appears here..." class="w-full pl-10 pr-4 py-3 text-lg border-2 border-slate-200 rounded-xl focus:border-blue-500 outline-none font-mono" oninput="handleSearch()" />
+                        <input id="id-search-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Scan or type..." class="w-full pl-10 pr-4 py-3 text-lg border-2 border-slate-200 rounded-xl focus:border-blue-500 outline-none font-mono" oninput="handleSearch()" />
                     </div>
                 </div>
 
                 <div class="relative flex justify-center items-center py-2">
                     <div class="absolute inset-0 border-t border-slate-200"></div>
-                    <span class="relative bg-white px-3 text-xs text-slate-400 font-medium">OR SEARCH BY NAME</span>
+                    <span class="relative bg-white px-3 text-xs text-slate-400 font-medium">OR</span>
                 </div>
 
                 <div>
                     <div class="relative">
                         <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5"></i>
-                        <input id="name-search-input" type="text" placeholder="Product Name (e.g. noor)" class="w-full pl-10 pr-4 py-3 text-lg border-2 border-slate-200 rounded-xl focus:border-blue-500 outline-none" oninput="handleSearch()" />
+                        <input id="name-search-input" type="text" placeholder="Search by Name" class="w-full pl-10 pr-4 py-3 text-lg border-2 border-slate-200 rounded-xl focus:border-blue-500 outline-none" oninput="handleSearch()" />
                     </div>
                 </div>
 
-                <p id="search-status" class="text-center text-xs text-slate-400 mt-3">Waiting for data connection...</p>
+                <p id="search-status" class="text-center text-xs text-slate-400 mt-3">Waiting...</p>
             </div>
 
             <div id="result-container" class="hidden space-y-2 fade-in">
                 <div class="bg-white rounded-xl shadow-lg border border-blue-100 overflow-hidden">
                     <div class="bg-blue-50 p-4 border-b border-blue-100">
-                        <p class="text-xs font-bold text-blue-600 mb-1">FOUND ITEM</p>
+                        <p class="text-xs font-bold text-blue-600 mb-1">ITEM FOUND</p>
                         <h2 id="result-title" class="text-xl font-bold text-slate-800 font-mono">Product Name</h2>
                     </div>
                     <div id="result-details" class="p-4 divide-y divide-slate-100"></div>
@@ -103,112 +104,96 @@
 
             lucide.createIcons();
             
-            // Auto-load data on start
-            window.onload = function() {
-                fetchData();
-            };
+            window.onload = function() { fetchData(); };
 
-            // --- CAMERA FUNCTIONS ---
+            // --- OPTIMIZED CAMERA LOGIC ---
             function toggleCamera() {
                 const readerContainer = document.getElementById("reader-container");
-                if (!readerContainer.classList.contains("hidden")) {
-                    stopCamera();
-                } else {
-                    startCamera();
-                }
+                if (!readerContainer.classList.contains("hidden")) { stopCamera(); } else { startCamera(); }
             }
 
             function startCamera() {
-                const readerContainer = document.getElementById("reader-container");
-                const btn = document.getElementById("camera-toggle-btn");
-                
-                // Show container
-                readerContainer.classList.remove("hidden");
-                btn.classList.add("hidden"); // Hide button while scanning
+                document.getElementById("reader-container").classList.remove("hidden");
+                document.getElementById("camera-toggle-btn").classList.add("hidden");
 
-                // Initialize Scanner
                 html5QrCode = new Html5Qrcode("reader");
-                const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
+                
+                // SPEED SETTINGS
+                const config = { 
+                    fps: 25, // Higher frame rate for faster scanning
+                    qrbox: { width: 300, height: 120 }, // Wide box for barcodes (Important!)
+                    aspectRatio: 1.0,
+                    experimentalFeatures: {
+                        useBarCodeDetectorIfSupported: true // Uses phone's native fast scanner
+                    }
+                };
                 
                 html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure)
                 .catch(err => {
-                    alert("Camera Error: " + err); // Show error on phone screen
+                    alert("Camera Error: " + err);
                     stopCamera();
                 });
             }
 
             function stopCamera() {
-                const readerContainer = document.getElementById("reader-container");
-                const btn = document.getElementById("camera-toggle-btn");
-
                 if (html5QrCode) {
                     html5QrCode.stop().then(() => {
                         html5QrCode.clear();
                         html5QrCode = null;
-                    }).catch(err => console.log("Stop failed", err));
+                    }).catch(err => console.log(err));
                 }
-
-                readerContainer.classList.add("hidden");
-                btn.classList.remove("hidden"); // Show button again
+                document.getElementById("reader-container").classList.add("hidden");
+                document.getElementById("camera-toggle-btn").classList.remove("hidden");
             }
 
             function onScanSuccess(decodedText, decodedResult) {
-                // Success!
+                // Play beep sound logic can go here
                 document.getElementById('id-search-input').value = decodedText;
-                stopCamera(); // Stop camera immediately
-                handleSearch(); // Search for the code
-                alert("Scanned: " + decodedText); // Confirmation alert
+                stopCamera();
+                handleSearch();
+                // alert("Scanned: " + decodedText); // Removed alert for speed
             }
 
             function onScanFailure(error) {
-                // Code scan error, ignore as it happens when no code is in view
+                // Ignore errors while scanning
             }
 
-            // --- DATA FUNCTIONS ---
+            // --- DATA LOGIC (Same as before) ---
             async function fetchData() {
                 const sheetId = document.getElementById("sheet-id").value;
                 const gid = document.getElementById("gid-id").value;
                 const statusText = document.getElementById("status-text");
 
-                statusText.innerText = "Connecting to Google Sheets...";
+                statusText.innerText = "Syncing...";
 
                 try {
                     const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
                     const response = await fetch(csvUrl);
-
-                    if (!response.ok) {
-                        throw new Error("Network response was not ok (" + response.status + ")");
-                    }
-
+                    if (!response.ok) throw new Error("Net Error");
                     const text = await response.text();
                     
-                    // Check if we got an HTML login page instead of CSV
-                    if(text.trim().startsWith("<!DOCTYPE html>")) {
-                        throw new Error("Permission Denied. Make Sheet 'Anyone with link'");
-                    }
+                    if(text.includes("<!DOCTYPE html>")) throw new Error("Check Sheet Permissions");
 
                     const parsedData = parseCSV(text);
-
-                    if (parsedData.length === 0) throw new Error("Sheet is empty");
+                    if (parsedData.length === 0) throw new Error("Empty Sheet");
 
                     inventory = parsedData;
                     headers = Object.keys(parsedData[0]);
 
-                    statusText.innerText = "✅ System Ready (" + inventory.length + " items)";
-                    document.getElementById("search-status").innerText = "Database Loaded. Ready to scan.";
+                    statusText.innerText = "✅ Ready (" + inventory.length + " Items)";
+                    document.getElementById("search-status").innerText = "Ready to scan.";
                     
                 } catch (err) {
-                    statusText.innerText = "❌ Error: " + err.message;
-                    alert("Data Error: " + err.message + "\nPlease check Google Sheet Permissions.");
+                    statusText.innerText = "❌ Error";
+                    alert("Error: " + err.message);
                 }
             }
 
-            // --- SEARCH & DISPLAY LOGIC (Unchanged) ---
+            // --- SEARCH LOGIC ---
             function displayItemDetails(match) {
                 document.getElementById("list-container").classList.add("hidden");
                 document.getElementById("no-result").classList.add("hidden");
                 document.getElementById("result-container").classList.remove("hidden");
-
                 document.getElementById("result-title").innerText = Object.values(match)[1];
 
                 let html = "";
