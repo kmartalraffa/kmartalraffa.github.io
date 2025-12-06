@@ -6,6 +6,7 @@
         <title>Inventory Scanner</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <script src="https://unpkg.com/lucide@latest"></script>
+        <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
         <style>
             /* Custom scrollbar for cleaner look */
             ::-webkit-scrollbar {
@@ -33,6 +34,11 @@
                     opacity: 1;
                     transform: translateY(0);
                 }
+            }
+            #reader {
+                width: 100%;
+                border-radius: 0.75rem;
+                overflow: hidden;
             }
         </style>
     </head>
@@ -76,54 +82,31 @@
                 </div>
             </div>
 
-            <div
-                id="settings-panel"
-                class="hidden bg-white p-4 rounded-xl shadow-sm border border-slate-200 fade-in"
-            >
-                <h3 class="font-semibold text-sm mb-3 flex items-center gap-2">
-                    <i data-lucide="database" class="w-4 h-4"></i> Data Source
-                    Configuration
-                </h3>
-                <div class="space-y-3">
-                    <div>
-                        <label
-                            class="block text-xs font-medium text-slate-500 mb-1"
-                            >Sheet ID</label
-                        >
-                        <input
-                            id="sheet-id"
-                            type="text"
-                            value="1eEFtb7wxOOLw-TFTf_NvSFq1VQy1qYlMoVmiZkFgUys"
-                            class="w-full text-xs p-2 border rounded bg-slate-50 font-mono text-slate-500 cursor-not-allowed"
-                            disabled
-                        />
-                    </div>
-                    <div>
-                        <label
-                            class="block text-xs font-medium text-slate-500 mb-1"
-                            >GID (Tab ID)</label
-                        >
-                        <input
-                            id="gid-id"
-                            type="text"
-                            value="710656272"
-                            class="w-full text-xs p-2 border rounded bg-slate-50 font-mono text-slate-500 cursor-not-allowed"
-                            disabled
-                        />
-                    </div>
-                    <button
-                        onclick="fetchData()"
-                        class="w-full py-2 bg-slate-800 text-white rounded-lg text-sm hover:bg-slate-900 flex items-center justify-center gap-2"
-                    >
-                        <i data-lucide="refresh-cw" class="w-3 h-3"></i> Reload
-                        Data
-                    </button>
-                </div>
+            <div id="settings-panel" class="hidden">
+                 <input id="sheet-id" type="text" value="1eEFtb7wxOOLw-TFTf_NvSFq1VQy1qYlMoVmiZkFgUys" />
+                 <input id="gid-id" type="text" value="710656272" />
             </div>
 
             <div
                 class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4"
             >
+                <div id="camera-section" class="space-y-2">
+                    <button 
+                        id="camera-toggle-btn"
+                        onclick="toggleCamera()"
+                        class="w-full py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-semibold hover:bg-blue-200 flex items-center justify-center gap-2 transition-colors"
+                    >
+                        <i data-lucide="camera" class="w-4 h-4"></i>
+                        Open Camera to Scan
+                    </button>
+                    
+                    <div id="reader-container" class="hidden bg-black rounded-xl overflow-hidden relative">
+                         <div id="reader"></div>
+                         <button onclick="stopCamera()" class="absolute top-2 right-2 bg-white/80 p-1 rounded-full text-red-600">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                         </button>
+                    </div>
+                </div>
                 <div>
                     <label
                         class="block text-sm font-semibold text-slate-700 mb-2"
@@ -223,281 +206,3 @@
                     id="match-list"
                     class="bg-white rounded-xl shadow-lg border border-slate-200 divide-y divide-slate-100"
                 ></div>
-            </div>
-
-            <div id="no-result" class="hidden space-y-2 fade-in">
-                <div
-                    class="bg-white p-8 rounded-xl border border-dashed border-slate-300 text-center text-slate-400"
-                >
-                    <i
-                        data-lucide="package"
-                        class="mx-auto mb-2 opacity-50 w-8 h-8"
-                    ></i>
-                    <p>
-                        No product found matching term "<span
-                            id="no-match-term"
-                        ></span
-                        >"
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <script>
-            // --- State ---
-            let inventory = [];
-            let headers = [];
-
-            // --- Initialization ---
-            lucide.createIcons();
-            fetchData();
-
-            // --- Core Functions ---
-
-            async function fetchData() {
-                // Sheet ID and GID are read from the disabled/hidden inputs
-                const sheetId = document.getElementById("sheet-id").value;
-                const gid = document.getElementById("gid-id").value;
-                const statusText = document.getElementById("status-text");
-                const errorBanner = document.getElementById("error-banner");
-
-                // UI Reset
-                statusText.innerText = "Syncing...";
-                errorBanner.classList.add("hidden");
-                inventory = [];
-
-                try {
-                    const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
-                    const response = await fetch(csvUrl);
-
-                    if (!response.ok)
-                        throw new Error(
-                            `Failed to fetch. Status: ${response.status}`
-                        );
-
-                    const text = await response.text();
-                    const parsedData = parseCSV(text);
-
-                    if (parsedData.length === 0)
-                        throw new Error("Sheet appears to be empty.");
-
-                    // Assume first row keys are headers
-                    inventory = parsedData;
-                    headers = Object.keys(parsedData[0]);
-
-                    statusText.innerText = `${inventory.length.toLocaleString()} items loaded`;
-                    document.getElementById(
-                        "search-status"
-                    ).innerText = `Ready to search ${inventory.length.toLocaleString()} records`;
-
-                    // Re-run search if there is text
-                    handleSearch();
-                } catch (err) {
-                    statusText.innerText = "Error syncing";
-                    document.getElementById("error-msg").innerText =
-                        err.message;
-                    errorBanner.classList.remove("hidden");
-                }
-            }
-
-            // Function to display the details of a single item
-            function displayItemDetails(match) {
-                document
-                    .getElementById("list-container")
-                    .classList.add("hidden");
-                document.getElementById("no-result").classList.add("hidden");
-                document
-                    .getElementById("result-container")
-                    .classList.remove("hidden");
-
-                // Use the second column (Name) for the main title display
-                document.getElementById("result-title").innerText =
-                    Object.values(match)[1];
-
-                // Build Details HTML
-                let html = "";
-                headers.forEach((header, index) => {
-                    const val = match[header];
-                    if (!val && val !== 0) return; // Skip empty
-
-                    // Customize display for the Barcode/ID column (first column, index 0)
-                    const valueDisplay =
-                        index === 0
-                            ? `<span class="font-mono text-sm bg-slate-100 px-2 py-1 rounded">${val}</span>`
-                            : val;
-
-                    html += `
-                    <div class="py-3 grid grid-cols-3 gap-4">
-                        <span class="text-sm font-medium text-slate-500 col-span-1 self-center">${header}</span>
-                        <span class="text-sm font-semibold text-slate-800 col-span-2 break-words">${valueDisplay}</span>
-                    </div>
-                `;
-                });
-                document.getElementById("result-details").innerHTML = html;
-            }
-
-            function handleSearch() {
-                const idTerm = document
-                    .getElementById("id-search-input")
-                    .value.trim()
-                    .toLowerCase();
-                const nameTerm = document
-                    .getElementById("name-search-input")
-                    .value.trim()
-                    .toLowerCase();
-
-                const resultContainer =
-                    document.getElementById("result-container");
-                const listContainer = document.getElementById("list-container");
-                const noResultContainer = document.getElementById("no-result");
-                const searchStatus = document.getElementById("search-status");
-
-                // Clear previous results
-                resultContainer.classList.add("hidden");
-                listContainer.classList.add("hidden");
-                noResultContainer.classList.add("hidden");
-
-                let term = "";
-                let matches = [];
-
-                if (idTerm.length > 0) {
-                    // --- ID (Barcode) Search: Exact Match ---
-                    term = idTerm;
-                    document.getElementById("name-search-input").value = ""; // Clear other box
-                    searchStatus.innerText = `Searching for exact ID "${term}"...`;
-
-                    // Exact match search on Barcode (column 0)
-                    const exactMatch = inventory.find((row) => {
-                        const values = Object.values(row);
-                        return String(values[0]).toLowerCase() === term;
-                    });
-                    if (exactMatch) matches.push(exactMatch);
-                } else if (nameTerm.length > 0) {
-                    // --- Name Search: Multi-Term Substring Match (UPDATED LOGIC) ---
-
-                    if (nameTerm.length < 3) {
-                        searchStatus.innerText = `Type at least 3 characters to search product names.`;
-                        return;
-                    }
-
-                    term = nameTerm;
-                    document.getElementById("id-search-input").value = ""; // Clear other box
-                    searchStatus.innerText = `Searching for product matching tokens: "${term}"...`;
-
-                    // Tokenize the search term (split by space)
-                    const searchTokens = nameTerm
-                        .split(/\s+/)
-                        .filter((token) => token.length > 0);
-
-                    // Filter inventory where ALL tokens are included in the product name (column 1)
-                    matches = inventory.filter((row) => {
-                        const values = Object.values(row);
-                        const productName = String(values[1]).toLowerCase();
-
-                        // Check if the product name includes ALL search tokens
-                        return (
-                            values.length > 1 &&
-                            searchTokens.every((token) =>
-                                productName.includes(token)
-                            )
-                        );
-                    });
-                } else {
-                    // No term entered
-                    if (inventory.length > 0) {
-                        searchStatus.innerText = `Ready to search ${inventory.length.toLocaleString()} records`;
-                    }
-                    return;
-                }
-
-                // --- Display Results ---
-
-                if (matches.length === 1) {
-                    // Single exact match (from either search type)
-                    displayItemDetails(matches[0]);
-                    searchStatus.innerText = `Found result for "${term}"`;
-                } else if (matches.length > 1) {
-                    // Multiple matches from the substring search
-                    listContainer.classList.remove("hidden");
-                    const matchList = document.getElementById("match-list");
-                    matchList.innerHTML = "";
-
-                    matches.forEach((match) => {
-                        const name = Object.values(match)[1];
-                        const barcode = Object.values(match)[0];
-
-                        const listItem = document.createElement("div");
-                        listItem.className =
-                            "p-4 flex justify-between items-center hover:bg-slate-50 cursor-pointer transition-colors";
-                        listItem.innerHTML = `
-                            <div>
-                                <p class="font-semibold text-slate-800">${name}</p>
-                                <p class="text-xs text-slate-400 font-mono">${barcode}</p>
-                            </div>
-                            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
-                        `;
-                        // Attach the click handler to view details
-                        listItem.onclick = () => {
-                            displayItemDetails(match);
-                            lucide.createIcons(); // Re-render icons after DOM modification
-                        };
-                        matchList.appendChild(listItem);
-                    });
-
-                    lucide.createIcons(); // Re-render icons after DOM modification
-                    searchStatus.innerText = `${matches.length} matches found for "${term}"`;
-                } else {
-                    // No matches
-                    document.getElementById("no-match-term").innerText = term;
-                    noResultContainer.classList.remove("hidden");
-                    searchStatus.innerText = `No match found for "${term}"`;
-                }
-            }
-
-            // --- Helper: CSV Parser (Same robust logic) ---
-            function parseCSV(text) {
-                const lines = text.split(/\r?\n/);
-                if (lines.length < 2) return [];
-
-                const headers = splitCSVLine(lines[0]);
-                const result = [];
-
-                for (let i = 1; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (!line) continue;
-
-                    const values = splitCSVLine(line);
-                    const entry = {};
-
-                    headers.forEach((header, index) => {
-                        entry[header.trim()] = values[index]
-                            ? values[index].trim()
-                            : "";
-                    });
-                    result.push(entry);
-                }
-                return result;
-            }
-
-            function splitCSVLine(line) {
-                const values = [];
-                let current = "";
-                let inQuotes = false;
-
-                for (let i = 0; i < line.length; i++) {
-                    const char = line[i];
-                    if (char === '"') {
-                        inQuotes = !inQuotes;
-                    } else if (char === "," && !inQuotes) {
-                        values.push(current);
-                        current = "";
-                    } else {
-                        current += char;
-                    }
-                }
-                values.push(current);
-                return values;
-            }
-        </script>
-    </body>
-</html>
