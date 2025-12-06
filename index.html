@@ -12,12 +12,26 @@
             ::-webkit-scrollbar { width: 6px; }
             ::-webkit-scrollbar-track { background: #f1f5f9; }
             ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-            /* Animations */
             .fade-in { animation: fadeIn 0.3s ease-out; }
             @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-            /* Camera Styling */
-            #reader { width: 100%; border-radius: 0.75rem; overflow: hidden; background: black; }
-            #reader video { object-fit: cover; }
+            
+            /* Camera Container Styling - Restricting height */
+            #reader-container {
+                max-height: 180px; /* Limits the visible camera area height */
+                overflow: hidden;
+            }
+            
+            /* Camera Element */
+            #reader { 
+                width: 100%; 
+                background: black;
+                /* Adjust positioning to center the relevant part */
+                margin-top: -50px; 
+            }
+            #reader video { 
+                object-fit: cover; 
+                height: 250px !important; /* Force video height to fill */
+            }
         </style>
     </head>
     <body class="bg-slate-50 min-h-screen font-sans text-slate-800 p-3 md:p-6">
@@ -37,25 +51,26 @@
                  <input id="sheet-id" type="text" value="1eEFtb7wxOOLw-TFTf_NvSFq1VQy1qYlMoVmiZkFgUys" />
                  <input id="gid-id" type="text" value="710656272" />
             </div>
-            <p id="status-text" class="text-center text-xs font-medium text-slate-500 bg-white py-1.5 rounded-full border border-slate-100 shadow-sm">Initializing database...</p>
+            <p id="status-text" class="text-center text-xs font-medium text-slate-500 bg-white py-1.5 rounded-full border border-slate-100 shadow-sm">Initializing...</p>
 
-            <div id="reader-container" class="hidden bg-black rounded-2xl overflow-hidden relative border-4 border-slate-900 shadow-2xl fade-in">
+            <div id="reader-container" class="hidden bg-black rounded-2xl border-4 border-slate-900 shadow-2xl fade-in relative">
                     <div id="reader"></div>
-                    <button onclick="stopCamera()" class="absolute top-3 right-3 bg-white/20 backdrop-blur-md p-2 rounded-full text-white hover:bg-white/30 transition-all z-10 active:scale-95">
-                    <i data-lucide="x" class="w-5 h-5"></i>
+                    <button onclick="stopCamera()" class="absolute top-2 right-2 bg-white/20 backdrop-blur-md p-1.5 rounded-full text-white hover:bg-white/30 z-20">
+                    <i data-lucide="x" class="w-4 h-4"></i>
                     </button>
+                    <div class="absolute top-1/2 left-0 right-0 border-t-2 border-red-500/50 pointer-events-none z-10 transform -translate-y-1/2"></div>
             </div>
 
             <div class="bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-slate-100 space-y-5">
                 
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Scan or Enter Barcode / ID</label>
+                    <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Scan or Enter Barcode</label>
                     <div class="flex gap-2">
                         <div class="relative flex-grow">
                             <i data-lucide="barcode" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 z-10"></i>
-                            <input id="id-search-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Tap camera or type..." class="w-full pl-10 pr-4 py-3.5 text-lg border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-300 font-mono" oninput="handleSearch()" />
+                            <input id="id-search-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Tap camera button ->" class="w-full pl-10 pr-4 py-3.5 text-lg border-2 border-slate-200 rounded-xl focus:border-blue-500 outline-none font-mono" oninput="handleSearch()" />
                         </div>
-                        <button id="camera-toggle-btn" onclick="toggleCamera()" class="bg-blue-600 text-white p-3.5 rounded-xl hover:bg-blue-700 active:scale-95 transition-all shadow-md flex-shrink-0" aria-label="Open Camera">
+                        <button id="camera-toggle-btn" onclick="toggleCamera()" class="bg-blue-600 text-white p-3.5 rounded-xl hover:bg-blue-700 active:scale-95 transition-all shadow-md flex-shrink-0">
                             <i data-lucide="camera" class="w-6 h-6"></i>
                         </button>
                     </div>
@@ -63,13 +78,13 @@
 
                 <div class="relative flex justify-center items-center py-1">
                     <div class="absolute inset-0 border-t border-slate-100"></div>
-                    <span class="relative bg-white px-4 text-xs text-slate-400 font-semibold uppercase tracking-wider">OR SEARCH BY NAME</span>
+                    <span class="relative bg-white px-4 text-xs text-slate-400 font-semibold uppercase tracking-wider">OR</span>
                 </div>
 
                 <div>
                     <div class="relative">
                         <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 z-10"></i>
-                        <input id="name-search-input" type="text" placeholder="E.g., Noor Oil 1.5L (Min 3 chars)" class="w-full pl-10 pr-4 py-3.5 text-lg border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-300" oninput="handleSearch()" />
+                        <input id="name-search-input" type="text" placeholder="Search Item Name" class="w-full pl-10 pr-4 py-3.5 text-lg border-2 border-slate-200 rounded-xl focus:border-blue-500 outline-none" oninput="handleSearch()" />
                     </div>
                 </div>
             </div>
@@ -90,14 +105,13 @@
             </div>
 
             <div id="list-container" class="hidden space-y-3 fade-in">
-                 <p class="text-sm font-bold text-slate-500 ml-2">Multiple Items Found:</p>
                 <div id="match-list" class="bg-white rounded-2xl shadow-sm border border-slate-100 divide-y divide-slate-50 overflow-hidden"></div>
             </div>
 
             <div id="no-result" class="hidden space-y-2 fade-in">
                 <div class="bg-white p-8 rounded-2xl border-2 border-dashed border-slate-200 text-center text-slate-400">
                     <i data-lucide="package-x" class="mx-auto mb-3 opacity-50 w-10 h-10"></i>
-                    <p class="font-medium">No item found matching your search.</p>
+                    <p class="font-medium">No item found.</p>
                 </div>
             </div>
         </div>
@@ -107,13 +121,9 @@
             let headers = [];
             let html5QrCode = null;
 
-            // Initialize Icons
             lucide.createIcons();
-            
-            // Load data when page opens
             window.onload = function() { fetchData(); };
 
-            // --- CAMERA FUNCTIONS ---
             function toggleCamera() {
                 const readerContainer = document.getElementById("reader-container");
                 if (!readerContainer.classList.contains("hidden")) { stopCamera(); } else { startCamera(); }
@@ -121,18 +131,17 @@
 
             function startCamera() {
                 document.getElementById("reader-container").classList.remove("hidden");
-                // Disable button while scanning
                 const btn = document.getElementById("camera-toggle-btn");
                 btn.disabled = true;
-                btn.classList.add("opacity-50", "cursor-not-allowed");
+                btn.classList.add("opacity-50");
 
                 html5QrCode = new Html5Qrcode("reader");
                 
-                // CONFIG FOR SMALLER SCAN BOX (As requested in Pic 2)
+                // ADJUSTED CONFIG FOR WIDE RECTANGULAR SCANNING
                 const config = { 
                     fps: 25, 
-                    qrbox: { width: 250, height: 250 }, // Smaller square box
-                    aspectRatio: 1.0,
+                    qrbox: { width: 300, height: 100 }, // WIDE AND SHORT BOX
+                    aspectRatio: 1.77, // 16:9 Aspect ratio to fill width
                     experimentalFeatures: { useBarCodeDetectorIfSupported: true }
                 };
                 
@@ -151,57 +160,49 @@
                     }).catch(err => console.log(err));
                 }
                 document.getElementById("reader-container").classList.add("hidden");
-                // Re-enable button
                 const btn = document.getElementById("camera-toggle-btn");
                 btn.disabled = false;
-                btn.classList.remove("opacity-50", "cursor-not-allowed");
+                btn.classList.remove("opacity-50");
             }
 
             function onScanSuccess(decodedText, decodedResult) {
                 document.getElementById('id-search-input').value = decodedText;
                 stopCamera();
                 handleSearch();
-                // Optional: Vibrate on success
                 if (navigator.vibrate) navigator.vibrate(200);
             }
 
-            function onScanFailure(error) { /* Ignore errors during scanning */ }
+            function onScanFailure(error) {}
 
-            // --- DATA LOADING (Unchanged) ---
             async function fetchData() {
                 const sheetId = document.getElementById("sheet-id").value;
                 const gid = document.getElementById("gid-id").value;
                 const statusText = document.getElementById("status-text");
-
-                statusText.innerText = "🔄 Syncing with Item Master...";
-                statusText.classList.add("animate-pulse", "text-blue-600");
+                statusText.innerText = "Syncing...";
 
                 try {
                     const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
                     const response = await fetch(csvUrl);
-                    if (!response.ok) throw new Error("Network Error");
+                    if (!response.ok) throw new Error("Net Error");
                     const text = await response.text();
                     
-                    if(text.includes("<!DOCTYPE html>")) throw new Error("Check Sheet Permissions (Must be Public)");
+                    if(text.includes("<!DOCTYPE html>")) throw new Error("Check Permissions");
 
                     const parsedData = parseCSV(text);
-                    if (parsedData.length === 0) throw new Error("Sheet is Empty");
+                    if (parsedData.length === 0) throw new Error("Empty Sheet");
 
                     inventory = parsedData;
                     headers = Object.keys(parsedData[0]);
 
-                    statusText.innerText = `✅ Ready: ${inventory.length.toLocaleString()} Items Loaded`;
-                    statusText.classList.remove("animate-pulse", "text-blue-600");
+                    statusText.innerText = `✅ Ready: ${inventory.length.toLocaleString()} Items`;
                     statusText.classList.add("text-green-600");
                     
                 } catch (err) {
-                    statusText.innerText = "❌ Sync Failed: " + err.message;
-                    statusText.classList.remove("animate-pulse", "text-blue-600");
+                    statusText.innerText = "❌ Sync Failed";
                     statusText.classList.add("text-red-600");
                 }
             }
 
-            // --- SEARCH & DISPLAY LOGIC (Unchanged) ---
             function displayItemDetails(match) {
                 document.getElementById("list-container").classList.add("hidden");
                 document.getElementById("no-result").classList.add("hidden");
@@ -214,24 +215,19 @@
                     if (!val && val !== 0) return;
                     
                     let valueDisplay = val;
-                    let rowClass = "py-3 grid grid-cols-3 gap-4 items-center";
-                    
-                    // Highlight Barcode (First column)
                     if (index === 0) {
                         valueDisplay = `<span class="font-mono font-bold text-blue-700 bg-blue-50 px-2 py-1 rounded-md select-all">${val}</span>`;
-                    }
-                    // Highlight Price fields (Assuming they contain "Price" or "MRP")
-                    else if (header.toLowerCase().includes("price") || header.toLowerCase().includes("mrp")) {
+                    } else if (header.toLowerCase().includes("price") || header.toLowerCase().includes("mrp")) {
                          valueDisplay = `<span class="font-bold text-green-700">${val}</span>`;
                     }
 
-                    html += `<div class="${rowClass}">
+                    html += `<div class="py-3 grid grid-cols-3 gap-4 items-center">
                                 <span class="text-sm font-semibold text-slate-500 uppercase tracking-wider col-span-1">${header}</span>
                                 <span class="text-base font-medium text-slate-800 col-span-2 break-words">${valueDisplay}</span>
                              </div>`;
                 });
                 document.getElementById("result-details").innerHTML = html;
-                lucide.createIcons(); // Refresh icons in results
+                lucide.createIcons();
             }
 
             function handleSearch() {
@@ -249,15 +245,12 @@
                 if (!idTerm && !nameTerm) return;
 
                 let matches = [];
-
                 if (idTerm) {
                     document.getElementById("name-search-input").value = "";
-                    // Exact match for barcode
                     matches = inventory.filter(row => String(Object.values(row)[0]).toLowerCase() === idTerm);
                 } else if (nameTerm) {
                     document.getElementById("id-search-input").value = "";
                     if (nameTerm.length < 3) return;
-                    // Multi-token search for name
                     const tokens = nameTerm.split(/\s+/).filter(t => t);
                     matches = inventory.filter(row => {
                         const prodName = String(Object.values(row)[1]).toLowerCase();
@@ -274,25 +267,16 @@
                     matches.forEach(match => {
                         const div = document.createElement("div");
                         div.className = "p-4 flex justify-between items-center hover:bg-slate-50 cursor-pointer transition-colors";
-                        div.innerHTML = `<div>
-                                            <p class="font-bold text-slate-800 text-lg">${Object.values(match)[1]}</p>
-                                            <p class="text-sm font-mono text-slate-500 flex items-center gap-1">
-                                                <i data-lucide="barcode" class="w-3 h-3"></i> ${Object.values(match)[0]}
-                                            </p>
-                                         </div>
-                                         <div class="bg-slate-100 p-2 rounded-full text-slate-400">
-                                            <i data-lucide="chevron-right" class="w-5 h-5"></i>
-                                         </div>`;
+                        div.innerHTML = `<div><p class="font-bold text-slate-800">${Object.values(match)[1]}</p><p class="text-xs font-mono text-slate-500">${Object.values(match)[0]}</p></div><i data-lucide="chevron-right" class="w-5 h-5 text-slate-400"></i>`;
                         div.onclick = () => displayItemDetails(match);
                         matchList.appendChild(div);
                     });
-                    lucide.createIcons(); // Refresh icons in list
+                    lucide.createIcons();
                 } else {
                     noResultContainer.classList.remove("hidden");
                 }
             }
 
-            // CSV Parser (Unchanged)
             function parseCSV(text) {
                 const lines = text.split(/\r?\n/);
                 if (lines.length < 2) return [];
