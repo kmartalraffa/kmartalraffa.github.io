@@ -3,82 +3,30 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Inventory Scanner</title>
+        <title>Inventory Scanner V2</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <script src="https://unpkg.com/lucide@latest"></script>
-        <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+        <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
         <style>
-            /* Custom scrollbar for cleaner look */
-            ::-webkit-scrollbar {
-                width: 8px;
-            }
-            ::-webkit-scrollbar-track {
-                background: #f1f5f9;
-            }
-            ::-webkit-scrollbar-thumb {
-                background: #cbd5e1;
-                border-radius: 4px;
-            }
-            ::-webkit-scrollbar-thumb:hover {
-                background: #94a3b8;
-            }
-            .fade-in {
-                animation: fadeIn 0.3s ease-out;
-            }
-            @keyframes fadeIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(5px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-            #reader {
-                width: 100%;
-                border-radius: 0.75rem;
-                overflow: hidden;
-            }
+            ::-webkit-scrollbar { width: 8px; }
+            ::-webkit-scrollbar-track { background: #f1f5f9; }
+            ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+            .fade-in { animation: fadeIn 0.3s ease-out; }
+            @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+            #reader { width: 100%; border-radius: 0.75rem; overflow: hidden; background: black; }
         </style>
     </head>
     <body class="bg-gray-100 min-h-screen font-sans text-slate-800 p-4">
         <div class="max-w-md mx-auto space-y-4">
-            <div
-                class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between"
-            >
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="bg-blue-600 p-2 rounded-lg text-white">
-                        <i data-lucide="barcode" class="w-6 h-6"></i>
+                        <i data-lucide="scan-line" class="w-6 h-6"></i>
                     </div>
                     <div>
-                        <h1 class="font-bold text-lg leading-tight">
-                            Inventory Scanner
-                        </h1>
-                        <p id="status-text" class="text-xs text-slate-500">
-                            Waiting to sync...
-                        </p>
+                        <h1 class="font-bold text-lg leading-tight">Inventory Scanner</h1>
+                        <p id="status-text" class="text-xs text-slate-500">Initializing...</p>
                     </div>
-                </div>
-            </div>
-
-            <div
-                id="error-banner"
-                class="hidden bg-red-50 text-red-700 p-4 rounded-xl border border-red-200 text-sm flex gap-3 items-start"
-            >
-                <i
-                    data-lucide="alert-circle"
-                    class="shrink-0 mt-0.5 w-5 h-5"
-                ></i>
-                <div>
-                    <p class="font-semibold">Connection Error</p>
-                    <p id="error-msg">Unknown error</p>
-                    <button
-                        onclick="fetchData()"
-                        class="mt-2 px-3 py-1 bg-red-100 hover:bg-red-200 text-red-800 rounded-md text-xs font-medium transition-colors"
-                    >
-                        Retry Connection
-                    </button>
                 </div>
             </div>
 
@@ -87,122 +35,268 @@
                  <input id="gid-id" type="text" value="710656272" />
             </div>
 
-            <div
-                class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4"
-            >
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                
                 <div id="camera-section" class="space-y-2">
-                    <button 
-                        id="camera-toggle-btn"
-                        onclick="toggleCamera()"
-                        class="w-full py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-semibold hover:bg-blue-200 flex items-center justify-center gap-2 transition-colors"
-                    >
-                        <i data-lucide="camera" class="w-4 h-4"></i>
+                    <button id="camera-toggle-btn" onclick="toggleCamera()" class="w-full py-3 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 shadow-md flex items-center justify-center gap-2 transition-all active:scale-95">
+                        <i data-lucide="camera" class="w-5 h-5"></i>
                         Open Camera to Scan
                     </button>
                     
-                    <div id="reader-container" class="hidden bg-black rounded-xl overflow-hidden relative">
+                    <div id="reader-container" class="hidden bg-black rounded-xl overflow-hidden relative border-4 border-slate-800">
                          <div id="reader"></div>
-                         <button onclick="stopCamera()" class="absolute top-2 right-2 bg-white/80 p-1 rounded-full text-red-600">
-                            <i data-lucide="x" class="w-4 h-4"></i>
+                         <button onclick="stopCamera()" class="absolute top-2 right-2 bg-white/90 p-2 rounded-full text-red-600 shadow-lg z-10">
+                            <i data-lucide="x" class="w-5 h-5"></i>
                          </button>
+                         <p class="text-white text-xs text-center p-2">Point camera at a barcode</p>
                     </div>
                 </div>
+
                 <div>
-                    <label
-                        class="block text-sm font-semibold text-slate-700 mb-2"
-                        >Scan Barcode (Exact Match)</label
-                    >
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Scan or Type Barcode</label>
                     <div class="relative">
-                        <i
-                            data-lucide="barcode"
-                            class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5"
-                        ></i>
-                        <input
-                            id="id-search-input"
-                            type="text"
-                            inputmode="numeric"
-                            pattern="[0-9]*"
-                            placeholder="e.g. 9900114..."
-                            class="w-full pl-10 pr-4 py-3 text-lg border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-300 font-mono"
-                            oninput="handleSearch()"
-                            autofocus
-                        />
+                        <i data-lucide="barcode" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5"></i>
+                        <input id="id-search-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Scan result appears here..." class="w-full pl-10 pr-4 py-3 text-lg border-2 border-slate-200 rounded-xl focus:border-blue-500 outline-none font-mono" oninput="handleSearch()" />
                     </div>
                 </div>
 
                 <div class="relative flex justify-center items-center py-2">
-                    <div
-                        class="absolute inset-0 border-t border-slate-200"
-                    ></div>
-                    <span
-                        class="relative bg-white px-3 text-xs text-slate-400 font-medium"
-                        >OR</span
-                    >
+                    <div class="absolute inset-0 border-t border-slate-200"></div>
+                    <span class="relative bg-white px-3 text-xs text-slate-400 font-medium">OR SEARCH BY NAME</span>
                 </div>
 
                 <div>
-                    <label
-                        class="block text-sm font-semibold text-slate-700 mb-2"
-                        >Search by Product Name (Min 3 Chars)</label
-                    >
                     <div class="relative">
-                        <i
-                            data-lucide="tag"
-                            class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5"
-                        ></i>
-                        <input
-                            id="name-search-input"
-                            type="text"
-                            placeholder="e.g. noor 1.5"
-                            class="w-full pl-10 pr-4 py-3 text-lg border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-slate-300"
-                            oninput="handleSearch()"
-                        />
+                        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5"></i>
+                        <input id="name-search-input" type="text" placeholder="Product Name (e.g. noor)" class="w-full pl-10 pr-4 py-3 text-lg border-2 border-slate-200 rounded-xl focus:border-blue-500 outline-none" oninput="handleSearch()" />
                     </div>
                 </div>
 
-                <p
-                    id="search-status"
-                    class="text-center text-xs text-slate-400 mt-3"
-                >
-                    Waiting for data...
-                </p>
+                <p id="search-status" class="text-center text-xs text-slate-400 mt-3">Waiting for data connection...</p>
             </div>
 
             <div id="result-container" class="hidden space-y-2 fade-in">
-                <h3
-                    class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1"
-                >
-                    Details for Selected Item
-                </h3>
-
-                <div
-                    class="bg-white rounded-xl shadow-lg border border-blue-100 overflow-hidden"
-                >
+                <div class="bg-white rounded-xl shadow-lg border border-blue-100 overflow-hidden">
                     <div class="bg-blue-50 p-4 border-b border-blue-100">
-                        <p class="text-xs font-bold text-blue-600 mb-1">
-                            ITEM DETAILS
-                        </p>
-                        <h2
-                            id="result-title"
-                            class="text-xl font-bold text-slate-800 font-mono"
-                        >
-                            Product Name
-                        </h2>
+                        <p class="text-xs font-bold text-blue-600 mb-1">FOUND ITEM</p>
+                        <h2 id="result-title" class="text-xl font-bold text-slate-800 font-mono">Product Name</h2>
                     </div>
-                    <div
-                        id="result-details"
-                        class="p-4 divide-y divide-slate-100"
-                    ></div>
+                    <div id="result-details" class="p-4 divide-y divide-slate-100"></div>
                 </div>
             </div>
 
             <div id="list-container" class="hidden space-y-2 fade-in">
-                <h3
-                    class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1"
-                >
-                    Multiple Matches Found
-                </h3>
-                <div
-                    id="match-list"
-                    class="bg-white rounded-xl shadow-lg border border-slate-200 divide-y divide-slate-100"
-                ></div>
+                <div id="match-list" class="bg-white rounded-xl shadow-lg border border-slate-200 divide-y divide-slate-100"></div>
+            </div>
+
+            <div id="no-result" class="hidden space-y-2 fade-in">
+                <div class="bg-white p-8 rounded-xl border border-dashed border-slate-300 text-center text-slate-400">
+                    <p>No product found.</p>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            let inventory = [];
+            let headers = [];
+            let html5QrCode = null;
+
+            lucide.createIcons();
+            
+            // Auto-load data on start
+            window.onload = function() {
+                fetchData();
+            };
+
+            // --- CAMERA FUNCTIONS ---
+            function toggleCamera() {
+                const readerContainer = document.getElementById("reader-container");
+                if (!readerContainer.classList.contains("hidden")) {
+                    stopCamera();
+                } else {
+                    startCamera();
+                }
+            }
+
+            function startCamera() {
+                const readerContainer = document.getElementById("reader-container");
+                const btn = document.getElementById("camera-toggle-btn");
+                
+                // Show container
+                readerContainer.classList.remove("hidden");
+                btn.classList.add("hidden"); // Hide button while scanning
+
+                // Initialize Scanner
+                html5QrCode = new Html5Qrcode("reader");
+                const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
+                
+                html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure)
+                .catch(err => {
+                    alert("Camera Error: " + err); // Show error on phone screen
+                    stopCamera();
+                });
+            }
+
+            function stopCamera() {
+                const readerContainer = document.getElementById("reader-container");
+                const btn = document.getElementById("camera-toggle-btn");
+
+                if (html5QrCode) {
+                    html5QrCode.stop().then(() => {
+                        html5QrCode.clear();
+                        html5QrCode = null;
+                    }).catch(err => console.log("Stop failed", err));
+                }
+
+                readerContainer.classList.add("hidden");
+                btn.classList.remove("hidden"); // Show button again
+            }
+
+            function onScanSuccess(decodedText, decodedResult) {
+                // Success!
+                document.getElementById('id-search-input').value = decodedText;
+                stopCamera(); // Stop camera immediately
+                handleSearch(); // Search for the code
+                alert("Scanned: " + decodedText); // Confirmation alert
+            }
+
+            function onScanFailure(error) {
+                // Code scan error, ignore as it happens when no code is in view
+            }
+
+            // --- DATA FUNCTIONS ---
+            async function fetchData() {
+                const sheetId = document.getElementById("sheet-id").value;
+                const gid = document.getElementById("gid-id").value;
+                const statusText = document.getElementById("status-text");
+
+                statusText.innerText = "Connecting to Google Sheets...";
+
+                try {
+                    const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+                    const response = await fetch(csvUrl);
+
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok (" + response.status + ")");
+                    }
+
+                    const text = await response.text();
+                    
+                    // Check if we got an HTML login page instead of CSV
+                    if(text.trim().startsWith("<!DOCTYPE html>")) {
+                        throw new Error("Permission Denied. Make Sheet 'Anyone with link'");
+                    }
+
+                    const parsedData = parseCSV(text);
+
+                    if (parsedData.length === 0) throw new Error("Sheet is empty");
+
+                    inventory = parsedData;
+                    headers = Object.keys(parsedData[0]);
+
+                    statusText.innerText = "✅ System Ready (" + inventory.length + " items)";
+                    document.getElementById("search-status").innerText = "Database Loaded. Ready to scan.";
+                    
+                } catch (err) {
+                    statusText.innerText = "❌ Error: " + err.message;
+                    alert("Data Error: " + err.message + "\nPlease check Google Sheet Permissions.");
+                }
+            }
+
+            // --- SEARCH & DISPLAY LOGIC (Unchanged) ---
+            function displayItemDetails(match) {
+                document.getElementById("list-container").classList.add("hidden");
+                document.getElementById("no-result").classList.add("hidden");
+                document.getElementById("result-container").classList.remove("hidden");
+
+                document.getElementById("result-title").innerText = Object.values(match)[1];
+
+                let html = "";
+                headers.forEach((header, index) => {
+                    const val = match[header];
+                    if (!val && val !== 0) return;
+                    const valueDisplay = index === 0 ? `<span class="font-mono bg-yellow-100 px-2 rounded">${val}</span>` : val;
+                    html += `<div class="py-2 grid grid-cols-3 gap-4"><span class="text-sm font-medium text-slate-500">${header}</span><span class="text-sm font-bold text-slate-800 col-span-2">${valueDisplay}</span></div>`;
+                });
+                document.getElementById("result-details").innerHTML = html;
+            }
+
+            function handleSearch() {
+                const idTerm = document.getElementById("id-search-input").value.trim().toLowerCase();
+                const nameTerm = document.getElementById("name-search-input").value.trim().toLowerCase();
+                
+                const resultContainer = document.getElementById("result-container");
+                const listContainer = document.getElementById("list-container");
+                const noResultContainer = document.getElementById("no-result");
+
+                resultContainer.classList.add("hidden");
+                listContainer.classList.add("hidden");
+                noResultContainer.classList.add("hidden");
+
+                if (!idTerm && !nameTerm) return;
+
+                let matches = [];
+
+                if (idTerm) {
+                    document.getElementById("name-search-input").value = "";
+                    matches = inventory.filter(row => String(Object.values(row)[0]).toLowerCase() === idTerm);
+                } else if (nameTerm) {
+                    document.getElementById("id-search-input").value = "";
+                    if (nameTerm.length < 3) return;
+                    const tokens = nameTerm.split(/\s+/).filter(t => t);
+                    matches = inventory.filter(row => {
+                        const prodName = String(Object.values(row)[1]).toLowerCase();
+                        return tokens.every(token => prodName.includes(token));
+                    });
+                }
+
+                if (matches.length === 1) {
+                    displayItemDetails(matches[0]);
+                } else if (matches.length > 1) {
+                    listContainer.classList.remove("hidden");
+                    const matchList = document.getElementById("match-list");
+                    matchList.innerHTML = "";
+                    matches.forEach(match => {
+                        const div = document.createElement("div");
+                        div.className = "p-3 flex justify-between items-center hover:bg-slate-50 cursor-pointer";
+                        div.innerHTML = `<div><p class="font-bold">${Object.values(match)[1]}</p><p class="text-xs font-mono">${Object.values(match)[0]}</p></div>`;
+                        div.onclick = () => displayItemDetails(match);
+                        matchList.appendChild(div);
+                    });
+                } else {
+                    noResultContainer.classList.remove("hidden");
+                }
+            }
+
+            function parseCSV(text) {
+                const lines = text.split(/\r?\n/);
+                if (lines.length < 2) return [];
+                const headers = splitCSVLine(lines[0]);
+                const result = [];
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    const values = splitCSVLine(line);
+                    const entry = {};
+                    headers.forEach((h, idx) => entry[h.trim()] = values[idx] ? values[idx].trim() : "");
+                    result.push(entry);
+                }
+                return result;
+            }
+
+            function splitCSVLine(line) {
+                const values = [];
+                let current = "";
+                let inQuotes = false;
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') { inQuotes = !inQuotes; }
+                    else if (char === "," && !inQuotes) { values.push(current); current = ""; }
+                    else { current += char; }
+                }
+                values.push(current);
+                return values;
+            }
+        </script>
+    </body>
+</html>
