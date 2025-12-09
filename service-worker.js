@@ -1,16 +1,32 @@
-const CACHE_NAME = 'kmart-cache-v1';
+const CACHE_NAME = 'kmart-cache-v3'; // Version 3 for Dark Mode
 const urlsToCache = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/icon-192.jpeg',  // ലോഗോ 1 (നിങ്ങളുടെ ഫയൽ പേര് jpeg ആണ്)
-  '/icon-512.png'    // ലോഗോ 2
+  '/icon-192.jpeg',
+  '/icon-512.png',
+  '/banner.png'
 ];
 
 self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(urlsToCache))
+  );
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
   );
 });
 
