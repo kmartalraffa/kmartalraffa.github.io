@@ -183,15 +183,10 @@
             <div id="result-container" class="hidden space-y-3 fade-in">
                 <div class="bg-white rounded-3xl shadow-lg border border-lime-100 overflow-hidden dark:bg-card-dark dark:border-[#333333]">
                     
-                    <div id="image-area" class="bg-white p-6 flex flex-col items-center justify-center border-b border-slate-50 min-h-[160px] hidden relative dark:bg-card-dark dark:border-b-slate-50-override">
+                    <div id="image-area" class="p-6 flex flex-col items-center justify-center border-b border-slate-50 min-h-[160px] hidden relative dark:bg-card-dark dark:border-b-slate-50-override">
                         <div class="absolute inset-0 bg-gradient-to-b from-lime-50/50 to-transparent"></div>
-                        <img id="product-image" src="" alt="Product" class="relative z-10 max-h-52 object-contain rounded-xl shadow-sm mb-3 hover:scale-105 transition-transform duration-300" />
-                        
-                        <a id="google-search-btn" href="#" target="_blank" class="hidden relative z-10 text-xs flex items-center gap-1.5 text-lime-700 bg-lime-100 px-4 py-2 rounded-full hover:bg-lime-200 transition-colors font-semibold dark:bg-lime-900/50 dark:text-lime-400 dark:hover:bg-lime-900/80">
-                            <i data-lucide="globe" class="w-3.5 h-3.5"></i> Find on Google
-                        </a>
-                        <p id="image-loading" class="text-xs text-slate-400 animate-pulse hidden dark:text-slate-400-override">Searching...</p>
-                    </div>
+                        <img id="product-image" src="" alt="Product" class="relative z-10 max-h-52 object-contain rounded-xl shadow-sm mb-3" />
+                        </div>
 
                     <div class="bg-slate-50 p-5 border-b border-slate-100 flex items-center gap-3 dark:bg-slate-50-override dark:border-b-slate-50-override">
                          <div class="bg-lime-500 p-2 rounded-xl text-white shadow-sm shadow-lime-500/40">
@@ -300,7 +295,6 @@
                     headers = Object.keys(parsedData[0]);
                     
                     // Update status bar for online status
-                    // Note: Dark mode classes are applied via CSS media query/utility classes
                     statusText.innerHTML = `<span class="w-2 h-2 rounded-full bg-lime-500"></span> Online • ${inventory.length.toLocaleString()} Items`;
                     statusText.classList.replace("text-slate-400", "text-lime-700");
                     statusText.classList.replace("bg-white", "bg-lime-50");
@@ -320,64 +314,47 @@
                 }
             }
 
+            // MODIFIED FUNCTION: All external image fetching logic removed
             async function displayItemDetails(match) {
                 document.getElementById("list-container").classList.add("hidden");
                 document.getElementById("no-result").classList.add("hidden");
                 document.getElementById("result-container").classList.remove("hidden");
                 
                 const productName = Object.values(match)[1];
-                const barcode = Object.values(match)[0];
                 document.getElementById("result-title").innerText = productName;
 
                 const imgArea = document.getElementById("image-area");
                 const imgElement = document.getElementById("product-image");
-                const googleBtn = document.getElementById("google-search-btn");
-                const loadingText = document.getElementById("image-loading");
                 
                 imgArea.classList.remove("hidden");
                 imgElement.classList.add("hidden");
-                googleBtn.classList.add("hidden");
-                loadingText.classList.remove("hidden"); 
 
                 let imgUrl = match['Image'] || match['image'] || match['IMAGE'];
                 
                 if (imgUrl && imgUrl.trim() !== "") {
+                    // Display image if 'Image' column value is present
                     imgElement.src = imgUrl;
                     imgElement.classList.remove("hidden");
-                    loadingText.classList.add("hidden");
                 } else {
-                    try {
-                        const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
-                        const data = await response.json();
-                        
-                        if (data.product && (data.product.image_front_url || data.product.image_url)) {
-                            imgElement.src = data.product.image_front_url || data.product.image_url;
-                            imgElement.classList.remove("hidden");
-                        } else {
-                            googleBtn.href = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(productName + " " + barcode)}`;
-                            googleBtn.classList.remove("hidden");
-                        }
-                    } catch (e) {
-                        googleBtn.href = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(productName + " " + barcode)}`;
-                        googleBtn.classList.remove("hidden");
-                    }
-                    loadingText.classList.add("hidden");
+                    // Hide the image area if no local image URL is found
+                    imgArea.classList.add("hidden");
                 }
 
                 let html = "";
                 headers.forEach((header, index) => {
                     const val = match[header];
+                    // Skip if value is empty or header is 'image' (case insensitive)
                     if ((!val && val !== 0) || header.toLowerCase() === 'image') return;
                     
                     let valueDisplay = val;
                     let valueClass = 'text-base font-medium text-slate-700 col-span-2 break-words dark:text-slate-700-override';
                     
                     if (index === 0) {
-                        // Barcode/ID
+                        // Barcode/ID formatting
                         valueDisplay = `<span class="font-mono font-bold text-lime-700 bg-lime-50 px-2 py-1 rounded-md select-all border border-lime-100 dark:bg-lime-900/50 dark:border-lime-900/80 dark:text-lime-400">${val}</span>`;
                         valueClass = 'col-span-2 break-words';
                     } else if (header.toLowerCase().includes("price") || header.toLowerCase().includes("mrp")) {
-                        // Price
+                        // Price formatting
                          valueDisplay = `<span class="font-black text-lg text-slate-800 dark:text-slate-800-override">${val}</span>`;
                          valueClass = 'col-span-2 break-words';
                     }
