@@ -94,14 +94,21 @@
                         <input id="name-search-input" type="text" placeholder="Search Item Name" class="w-full pl-10 pr-4 py-3.5 text-lg border-2 border-slate-200 rounded-xl focus:border-blue-500 outline-none" oninput="handleSearch()" />
                     </div>
                 </div>
-            </div>
+                <div class="pt-3">
+                    <a href="https://script.google.com/macros/s/AKfycbydK4WhADeWZygz3ybsi8IiuQ-76MBIXs4EPPY3ayNB_B_IuwIvh_VMgg47MEgRKoWg/exec" target="_blank" class="w-full flex items-center justify-center gap-2 bg-red-600 text-white p-3.5 rounded-xl hover:bg-red-700 active:scale-95 transition-all shadow-md font-bold text-lg">
+                        <i data-lucide="scan" class="w-6 h-6"></i>
+                        Open Scanner Data
+                    </a>
+                </div>
+                </div>
 
             <div id="result-container" class="hidden space-y-3 fade-in">
                 <div class="bg-white rounded-2xl shadow-md border border-blue-100 overflow-hidden">
                     
                     <div id="image-area" class="bg-white p-4 flex flex-col items-center justify-center border-b border-slate-100 min-h-[150px] hidden">
                         <img id="product-image" src="" alt="Product" class="max-h-48 object-contain rounded-lg shadow-sm mb-2" />
-                        </div>
+                        
+                    </div>
 
                     <div class="bg-gradient-to-r from-blue-50 to-white p-4 border-b border-blue-100 flex items-center gap-3">
                          <div class="bg-blue-100 p-2 rounded-full text-blue-600">
@@ -222,7 +229,6 @@
                 // --- IMAGE HANDLING (EXTERNAL FETCHING AND GOOGLE SEARCH REMOVED) ---
                 const imgArea = document.getElementById("image-area");
                 const imgElement = document.getElementById("product-image");
-                // Note: googleBtn and loadingText are no longer needed, but we keep the structure for clarity if an internal image URL exists.
                 
                 imgArea.classList.remove("hidden");
                 imgElement.classList.add("hidden");
@@ -324,7 +330,7 @@
                 const values = [];
                 let current = "";
                 let inQuotes = false;
-                for (let i = 0; i < line.length; i++) {
+                for (let i = 0; i; i++) {
                     const char = line[i];
                     if (char === '"') { inQuotes = !inQuotes; }
                     else if (char === "," && !inQuotes) { values.push(current); current = ""; }
