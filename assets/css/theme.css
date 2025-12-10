@@ -58,3 +58,26 @@ a { color: var(--primary); }
 @media(min-width:900px){
   #theme-toggle { right: 2rem; bottom: 2rem; }
 }
+
+/* Dark-mode input overrides (append this to assets/css/theme.css) */
+html[data-theme="dark"] input[type="text"],
+html[data-theme="dark"] input[type="search"],
+html[data-theme="dark"] #id-search-input,
+html[data-theme="dark"] #name-search-input {
+  background: var(--surface) !important;   /* dark surface color from theme.css */
+  color: var(--text) !important;           /* readable text color */
+  border-color: rgba(255,255,255,0.06) !important; /* subtle border in dark */
+  box-shadow: none !important;
+}
+
+/* Placeholder color in dark theme */
+html[data-theme="dark"] input::placeholder {
+  color: var(--muted) !important;
+  opacity: 1 !important;
+}
+
+/* Make sure inputs have rounded look kept but not glowing white */
+html[data-theme="dark"] input:focus {
+  outline: none;
+  box-shadow: 0 0 0 6px rgba(132,204,22,0.06) !important; /* subtle lime focus */
+}
