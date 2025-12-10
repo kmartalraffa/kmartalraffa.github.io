@@ -246,6 +246,7 @@
             }
 
             async function displayItemDetails(match) {
+                // 1. സ്ക്രീൻ സെറ്റിംഗ്സ് (പഴയത് തന്നെ)
                 document.getElementById("list-container").classList.add("hidden");
                 document.getElementById("no-result").classList.add("hidden");
                 document.getElementById("result-container").classList.remove("hidden");
@@ -259,36 +260,60 @@
                 const googleBtn = document.getElementById("google-search-btn");
                 const loadingText = document.getElementById("image-loading");
                 
+                // റീസെറ്റ് ചെയ്യുന്നു
                 imgArea.classList.remove("hidden");
                 imgElement.classList.add("hidden");
                 googleBtn.classList.add("hidden");
                 loadingText.classList.remove("hidden"); 
 
-                let imgUrl = match['Image'] || match['image'] || match['IMAGE'];
+                // --- 2. പുതിയ ഇമേജ് ലോജിക് (GitHub Only) ---
                 
-                if (imgUrl && imgUrl.trim() !== "") {
-                    imgElement.src = imgUrl;
-                    imgElement.classList.remove("hidden");
-                    loadingText.classList.add("hidden");
-                } else {
-                    try {
-                        const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
-                        const data = await response.json();
-                        
-                        if (data.product && (data.product.image_front_url || data.product.image_url)) {
-                            imgElement.src = data.product.image_front_url || data.product.image_url;
-                            imgElement.classList.remove("hidden");
-                        } else {
-                            googleBtn.href = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(productName + " " + barcode)}`;
-                            googleBtn.classList.remove("hidden");
-                        }
-                    } catch (e) {
-                        googleBtn.href = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(productName + " " + barcode)}`;
-                        googleBtn.classList.remove("hidden");
-                    }
-                    loadingText.classList.add("hidden");
-                }
+                // ബാർകോഡ് വെച്ച് GitHub ലിങ്ക് ഉണ്ടാക്കുന്നു
+                // ഉദാഹരണത്തിന്: https://kmartalraffa.github.io/IMAGES/123456.png
+                let imgUrl = `https://kmartalraffa.github.io/IMAGES/${barcode}.png`;
 
+                // ഫോട്ടോയിലേക്ക് ലിങ്ക് കൊടുക്കുന്നു
+                imgElement.src = imgUrl;
+
+                // ഫോട്ടോ ലോഡ് ആയാൽ എന്ത് ചെയ്യണം?
+                imgElement.onload = function() {
+                    this.classList.remove("hidden"); // ഫോട്ടോ കാണിക്കുന്നു
+                    loadingText.classList.add("hidden"); // ലോഡിംഗ് ടെക്സ്റ്റ് മാറ്റുന്നു
+                };
+
+                // ഫോട്ടോ GitHub-ൽ ഇല്ലെങ്കിൽ എന്ത് ചെയ്യണം? (Error വന്നാൽ)
+                imgElement.onerror = function() {
+                    this.classList.add("hidden"); // പൊട്ടിയ ഇമേജ് മാറ്റുന്നു
+                    loadingText.classList.add("hidden");
+                    
+                    // ഗൂഗിൾ സേർച്ച് ബട്ടൺ കാണിക്കുന്നു
+                    googleBtn.href = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(productName + " " + barcode)}`;
+                    googleBtn.classList.remove("hidden");
+                };
+                // --- ഇമേജ് ലോജിക് അവസാനിച്ചു ---
+
+                // 3. ബാക്കി വിവരങ്ങൾ കാണിക്കുന്ന ഭാഗം (പഴയത് തന്നെ)
+                let html = "";
+                headers.forEach((header, index) => {
+                    const val = match[header];
+                    // ഇമേജ് കോളം ലിസ്റ്റിൽ കാണിക്കേണ്ട കാര്യമില്ല, അത് ഒഴിവാക്കുന്നു
+                    if ((!val && val !== 0) || header.toLowerCase() === 'image') return;
+                    
+                    let valueDisplay = val;
+                    if (index === 0) {
+                        valueDisplay = `<span class="font-mono font-bold text-lime-700 dark:text-lime-400 bg-lime-50 dark:bg-lime-900/30 px-2 py-1 rounded-md select-all border border-lime-100 dark:border-lime-900/50">${val}</span>`;
+                    } else if (header.toLowerCase().includes("price") || header.toLowerCase().includes("mrp")) {
+                         valueDisplay = `<span class="font-black text-lg text-slate-800 dark:text-white">${val}</span>`;
+                    }
+
+                    html += `<div class="py-3 grid grid-cols-3 gap-4 items-center">
+                                <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider col-span-1">${header}</span>
+                                <span class="text-base font-medium text-slate-700 dark:text-slate-300 col-span-2 break-words">${valueDisplay}</span>
+                             </div>`;
+                });
+                document.getElementById("result-details").innerHTML = html;
+                lucide.createIcons();
+            }
                 let html = "";
                 headers.forEach((header, index) => {
                     const val = match[header];
