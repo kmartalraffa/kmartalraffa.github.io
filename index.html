@@ -134,7 +134,7 @@
                  <input id="gid-id" type="text" value="710656272" />
             </div>
 
-            <div class="flex justify-between items-center px-2">
+            <div class="flex justify-between items-center px-2 dark:bg-[#222222]"> 
                 <p id="status-text" class="text-xs font-semibold text-slate-400 bg-white px-3 py-1.5 rounded-full border border-slate-100 shadow-sm flex items-center gap-2 dark:bg-card-dark dark:border-[#333333] dark:text-slate-400-override">
                     <span class="w-2 h-2 rounded-full bg-slate-300 animate-pulse"></span> Initializing...
                 </p>
@@ -186,7 +186,7 @@
                     <div id="image-area" class="p-6 flex flex-col items-center justify-center border-b border-slate-50 min-h-[160px] hidden relative dark:bg-card-dark dark:border-b-slate-50-override">
                         <div class="absolute inset-0 bg-gradient-to-b from-lime-50/50 to-transparent"></div>
                         <img id="product-image" src="" alt="Product" class="relative z-10 max-h-52 object-contain rounded-xl shadow-sm mb-3" />
-                        </div>
+                    </div>
 
                     <div class="bg-slate-50 p-5 border-b border-slate-100 flex items-center gap-3 dark:bg-slate-50-override dark:border-b-slate-50-override">
                          <div class="bg-lime-500 p-2 rounded-xl text-white shadow-sm shadow-lime-500/40">
@@ -314,7 +314,6 @@
                 }
             }
 
-            // MODIFIED FUNCTION: All external image fetching logic removed
             async function displayItemDetails(match) {
                 document.getElementById("list-container").classList.add("hidden");
                 document.getElementById("no-result").classList.add("hidden");
