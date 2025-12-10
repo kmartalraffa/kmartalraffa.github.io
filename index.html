@@ -1,4 +1,452 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <title>K MART AL RAFFA - Item Master</title>
+        
+        <link rel="manifest" href="manifest.json">
+        <meta name="theme-color" content="#65a30d">
+        <link rel="apple-touch-icon" href="icon-192.jpeg">
+        <link rel="icon" type="image/png" href="icon-512.png">
+
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://unpkg.com/lucide@latest"></script>
+        <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+        <style>
+            /* ----------------------------------------------------- */
+            /* BASE STYLES & SCROLLBAR (COMMON FOR LIGHT/DARK) */
+            /* ----------------------------------------------------- */
+            body { 
+                -webkit-user-select: none; user-select: none; 
+                -webkit-tap-highlight-color: transparent; 
+            }
+            ::-webkit-scrollbar { width: 6px; }
+            ::-webkit-scrollbar-thumb { 
+                background: #84cc16; 
+                border-radius: 3px; 
+            }
+            .fade-in { animation: fadeIn 0.3s ease-out; }
+            @keyframes fadeIn { 
+                from { opacity: 0; transform: translateY(5px); } 
+                to { opacity: 1; transform: translateY(0); } 
+            }
+            
+            /* Camera/Scanner Specific Styles */
+            #reader-container {
+                position: relative; width: 100%; height: 200px; overflow: hidden;
+                border-radius: 1rem; border: 3px solid #65a30d; background: black;
+            }
+            #reader { width: 100%; height: 100%; }
+            #reader video { width: 100% !important; height: 200px !important; object-fit: cover !important; }
+            
+            /* Green Overlay for Scanning */
+            .scan-overlay {
+                position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                width: 85%; height: 80px;
+                border: 2px solid rgba(132, 204, 22, 0.9);
+                box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6);
+                border-radius: 12px; pointer-events: none; z-index: 10;
+            }
+            .scan-line {
+                width: 100%; height: 3px; background: #a3e635; position: absolute; top: 0;
+                box-shadow: 0 0 10px #a3e635;
+                animation: scanMove 2s infinite linear;
+            }
+            @keyframes scanMove { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
+
+            /* ----------------------------------------------------- */
+            /* LIGHT MODE (DEFAULT) */
+            /* ----------------------------------------------------- */
+            .light-mode-scrollbar-track { background: #f7fee7; }
+            
+            /* ----------------------------------------------------- */
+            /* DARK MODE OVERRIDES (using @media for preference) */
+            /* ----------------------------------------------------- */
+            @media (prefers-color-scheme: dark) {
+                /* General Background */
+                body { background-color: #222222; color: #E0E0E0; } /* Dark Gray Background */
+                
+                /* Scrollbar for Dark Mode */
+                ::-webkit-scrollbar-track { background: #333333; }
+                
+                /* White Card/Container Overrides */
+                .dark\\:bg-card-dark { 
+                    background-color: #1a1a1a; /* Almost Black/Deep Gray for cards */
+                    border-color: #333333;
+                    box-shadow: 0 4px 20px -10px rgba(0, 0, 0, 0.5);
+                }
+
+                /* Text/Placeholder Overrides */
+                .dark\\:text-slate-900-override { color: #FAFAFA; } /* Header text */
+                .dark\\:placeholder-slate-300-override::placeholder { color: #666666; } /* Placeholder text */
+                .dark\\:text-slate-700-override { color: #BBBBBB; } /* Detail text */
+                .dark\\:text-slate-500-override { color: #888888; } /* Status/no-result text */
+
+                /* Input Field Overrides */
+                .dark\\:border-slate-100-override { 
+                    border-color: #333333; 
+                    background-color: #121212; /* Input background as seen in the screenshot */
+                }
+                .dark\\:focus\\:border-lime-500-override:focus { border-color: #84cc16; }
+
+                /* Separator Overrides */
+                .dark\\:border-t-slate-100-override { border-color: #333333; }
+                /* Changed: Separator text background uses card color, not white */
+                .dark\\:bg-white-override { background-color: #1a1a1a; } 
+
+                /* Result/List Item Overrides */
+                .dark\\:divide-slate-50-override > * + * { border-color: #333333; }
+                .dark\\:bg-slate-50-override { background-color: #1a1a1a; }
+                .dark\\:border-slate-50-override { border-color: #333333; }
+
+                /* Status Bar Overrides */
+                .dark\\:bg-lime-50-override { background-color: #1a1a1a; }
+                .dark\\:border-lime-100-override { border-color: #333333; }
+                .dark\\:text-lime-700-override { color: #A3E635; } /* Brighter lime in dark mode */
+                
+                /* No Result Box */
+                .dark\\:border-dashed-override { border-color: #333333; }
+                .dark\\:bg-slate-50-no-result-override { background-color: #1a1a1a; }
+                
+                /* Text/Icon Colors */
+                .dark\\:text-slate-300-override { color: #555555; }
+                .dark\\:text-slate-400-override { color: #888888; }
+                .dark\\:text-slate-800-override { color: #FAFAFA; }
+
+            }
+        </style>
+    </head>
+    <body class="bg-slate-50 min-h-screen font-sans text-slate-800 p-3 md:p-6 pb-20 light-mode-scrollbar-track dark:bg-[#222222] dark:text-[#E0E0E0]">
+        <div class="max-w-lg mx-auto space-y-4">
+            
+            <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-4 dark:bg-card-dark dark:border-[#333333]">
+                <div class="p-1 rounded-2xl border-2 border-lime-100 shadow-sm dark:border-[#333333]">
+                    <img src="icon-192.jpeg" class="w-12 h-12 rounded-xl object-cover" alt="K Mart Logo">
+                </div>
+                <div>
+                    <h1 class="font-black text-2xl text-slate-900 leading-none tracking-tight dark:text-slate-900-override">K MART</h1>
+                    <p class="text-xs font-bold text-lime-600 uppercase tracking-widest mt-1">Al Raffa • Item Master</p>
+                </div>
+            </div>
+
+            <div id="settings-panel" class="hidden">
+                 <input id="sheet-id" type="text" value="1eEFtb7wxOOLw-TFTf_NvSFq1VQy1qYlMoVmiZkFgUys" />
+                 <input id="gid-id" type="text" value="710656272" />
+            </div>
+
+            <div class="flex justify-between items-center px-2 dark:bg-[#222222]"> 
+                <p id="status-text" class="text-xs font-semibold text-slate-400 bg-white px-3 py-1.5 rounded-full border border-slate-100 shadow-sm flex items-center gap-2 dark:bg-card-dark dark:border-[#333333] dark:text-slate-400-override">
+                    <span class="w-2 h-2 rounded-full bg-slate-300 animate-pulse"></span> Initializing...
+                </p>
+            </div>
+
+            <div id="reader-container" class="hidden fade-in shadow-lg">
+                    <div id="reader"></div>
+                    <div class="scan-overlay"><div class="scan-line"></div></div>
+                    <button onclick="stopCamera()" class="absolute top-3 right-3 bg-black/40 backdrop-blur-md p-2 rounded-full text-white hover:bg-black/60 z-20 transition-all">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+            </div>
+
+            <div class="bg-white p-5 md:p-6 rounded-3xl shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] border border-slate-100 space-y-6 dark:bg-card-dark dark:border-[#333333] dark:shadow-[0_4px_20px_-10px_rgba(0,0,0,0.5)]">
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1 dark:text-slate-400-override">Barcode Scanner</label>
+                    <div class="flex gap-2">
+                        <div class="relative flex-grow">
+                            <i data-lucide="scan-barcode" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-6 h-6 z-10 dark:text-slate-300-override"></i>
+                            <input id="id-search-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Tap camera ->" 
+                                class="w-full pl-12 pr-4 py-4 text-xl border-2 border-slate-100 rounded-2xl focus:border-lime-500 focus:ring-4 focus:ring-lime-500/10 outline-none font-mono transition-all placeholder:text-slate-300 dark:border-slate-100-override dark:bg-[#121212] dark:text-white dark:focus:border-lime-500-override dark:placeholder-slate-300-override" 
+                                oninput="handleSearch()" />
+                        </div>
+                        <button id="camera-toggle-btn" onclick="toggleCamera()" class="bg-lime-500 text-white px-5 rounded-2xl hover:bg-lime-600 active:scale-95 transition-all shadow-lg shadow-lime-500/30 flex-shrink-0">
+                            <i data-lucide="camera" class="w-7 h-7"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="relative flex justify-center items-center">
+                    <div class="absolute inset-0 border-t border-slate-100 dark:border-t-slate-100-override"></div>
+                    <span class="relative bg-white px-4 text-[10px] font-bold text-slate-300 uppercase tracking-widest dark:bg-card-dark dark:text-slate-400-override">OR SEARCH BY NAME</span>
+                </div>
+
+                <div>
+                    <div class="relative">
+                        <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-5 h-5 z-10 dark:text-slate-300-override"></i>
+                        <input id="name-search-input" type="text" placeholder="Type product name..." 
+                            class="w-full pl-12 pr-4 py-4 text-lg border-2 border-slate-100 rounded-2xl focus:border-lime-500 focus:ring-4 focus:ring-lime-500/10 outline-none transition-all placeholder:text-slate-300 dark:border-slate-100-override dark:bg-[#121212] dark:text-white dark:focus:border-lime-500-override dark:placeholder-slate-300-override" 
+                            oninput="handleSearch()" />
+                    </div>
+                </div>
+            </div>
+
+            <div id="result-container" class="hidden space-y-3 fade-in">
+                <div class="bg-white rounded-3xl shadow-lg border border-lime-100 overflow-hidden dark:bg-card-dark dark:border-[#333333]">
+                    
+                    <div id="image-area" class="p-6 flex flex-col items-center justify-center border-b border-slate-50 min-h-[160px] hidden relative dark:bg-card-dark dark:border-b-slate-50-override">
+                        <div class="absolute inset-0 bg-gradient-to-b from-lime-50/50 to-transparent"></div>
+                        <img id="product-image" src="" alt="Product" class="relative z-10 max-h-52 object-contain rounded-xl shadow-sm mb-3" />
+                    </div>
+
+                    <div class="bg-slate-50 p-5 border-b border-slate-100 flex items-center gap-3 dark:bg-slate-50-override dark:border-b-slate-50-override">
+                         <div class="bg-lime-500 p-2 rounded-xl text-white shadow-sm shadow-lime-500/40">
+                             <i data-lucide="check" class="w-6 h-6"></i>
+                         </div>
+                         <div>
+                            <p class="text-[10px] font-bold text-lime-600 uppercase tracking-wider mb-0.5">Verified Item</p>
+                            <h2 id="result-title" class="text-xl font-black text-slate-800 leading-tight dark:text-slate-800-override">Product Name</h2>
+                         </div>
+                    </div>
+                    <div id="result-details" class="p-6 divide-y divide-slate-50 dark:divide-slate-50-override"></div>
+                </div>
+            </div>
+
+            <div id="list-container" class="hidden space-y-3 fade-in">
+                <div id="match-list" class="bg-white rounded-3xl shadow-sm border border-slate-100 divide-y divide-slate-50 overflow-hidden dark:bg-card-dark dark:border-[#333333] dark:divide-slate-50-override"></div>
+            </div>
+
+            <div id="no-result" class="hidden space-y-2 fade-in">
+                <div class="bg-white p-10 rounded-3xl border-2 border-dashed border-slate-200 text-center dark:bg-card-dark dark:border-dashed-override">
+                    <div class="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 dark:bg-slate-50-no-result-override">
+                        <i data-lucide="package-search" class="text-slate-300 w-8 h-8 dark:text-slate-300-override"></i>
+                    </div>
+                    <p class="font-medium text-slate-500 dark:text-slate-500-override">Item not found in database.</p>
+                </div>
+            </div>
+
+            <div class="pt-4 pb-6">
+                <img src="banner.png" class="w-full rounded-2xl shadow-sm border border-slate-100 object-cover dark:border-[#333333]" alt="K Mart Banner">
+            </div>
+
+        </div>
+
+        <script>
+            let inventory = [];
+            let headers = [];
+            let html5QrCode = null;
+
+            lucide.createIcons();
+            
+            window.onload = function() { 
+                fetchData(); 
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('service-worker.js')
+                    .then(() => console.log("SW Registered"))
+                    .catch(err => console.log("SW Failed", err));
+                }
+            };
+
+            function toggleCamera() {
+                const readerContainer = document.getElementById("reader-container");
+                if (!readerContainer.classList.contains("hidden")) { stopCamera(); } else { startCamera(); }
+            }
+
+            function startCamera() {
+                document.getElementById("reader-container").classList.remove("hidden");
+                const btn = document.getElementById("camera-toggle-btn");
+                btn.disabled = true;
+                btn.classList.add("opacity-50");
+                html5QrCode = new Html5Qrcode("reader");
+                const config = { 
+                    fps: 25, 
+                    qrbox: { width: 250, height: 250 }, 
+                    aspectRatio: 1.0, 
+                    experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+                };
+                html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure)
+                .catch(err => { alert("Camera Error: " + err); stopCamera(); });
+            }
+
+            function stopCamera() {
+                if (html5QrCode) {
+                    html5QrCode.stop().then(() => { html5QrCode.clear(); html5QrCode = null; }).catch(err => console.log(err));
+                }
+                document.getElementById("reader-container").classList.add("hidden");
+                const btn = document.getElementById("camera-toggle-btn");
+                btn.disabled = false;
+                btn.classList.remove("opacity-50");
+            }
+
+            function onScanSuccess(decodedText, decodedResult) {
+                document.getElementById('id-search-input').value = decodedText;
+                stopCamera();
+                handleSearch();
+                if (navigator.vibrate) navigator.vibrate(200);
+            }
+            function onScanFailure(error) {}
+
+            async function fetchData() {
+                const sheetId = document.getElementById("sheet-id").value;
+                const gid = document.getElementById("gid-id").value;
+                const statusText = document.getElementById("status-text");
+                const statusDot = statusText.querySelector("span");
+                
+                statusText.innerHTML = '<span class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span> Syncing...';
+                
+                try {
+                    const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+                    const response = await fetch(csvUrl);
+                    if (!response.ok) throw new Error("Net Error");
+                    const text = await response.text();
+                    if(text.includes("<!DOCTYPE html>")) throw new Error("Check Permissions");
+                    const parsedData = parseCSV(text);
+                    if (parsedData.length === 0) throw new Error("Empty Sheet");
+                    inventory = parsedData;
+                    headers = Object.keys(parsedData[0]);
+                    
+                    // Update status bar for online status
+                    statusText.innerHTML = `<span class="w-2 h-2 rounded-full bg-lime-500"></span> Online • ${inventory.length.toLocaleString()} Items`;
+                    statusText.classList.replace("text-slate-400", "text-lime-700");
+                    statusText.classList.replace("bg-white", "bg-lime-50");
+                    statusText.classList.replace("border-slate-100", "border-lime-100");
+                    statusText.classList.remove("dark:bg-card-dark"); // Remove initial dark class if it was present
+                    statusText.classList.remove("dark:border-[#333333]"); // Remove initial dark class if it was present
+                    statusText.classList.remove("dark:text-slate-400-override"); // Remove initial dark class if it was present
+
+                    // Add specific dark mode utility classes for the status text after successful sync
+                    statusText.classList.add("dark:bg-lime-50-override");
+                    statusText.classList.add("dark:border-lime-100-override");
+                    statusText.classList.add("dark:text-lime-700-override");
+                    
+                } catch (err) {
+                    statusText.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> Sync Failed`;
+                    statusText.classList.add("text-red-600");
+                }
+            }
+
+            async function displayItemDetails(match) {
+                document.getElementById("list-container").classList.add("hidden");
+                document.getElementById("no-result").classList.add("hidden");
+                document.getElementById("result-container").classList.remove("hidden");
+                
+                const productName = Object.values(match)[1];
+                document.getElementById("result-title").innerText = productName;
+
+                const imgArea = document.getElementById("image-area");
+                const imgElement = document.getElementById("product-image");
+                
+                imgArea.classList.remove("hidden");
+                imgElement.classList.add("hidden");
+
+                let imgUrl = match['Image'] || match['image'] || match['IMAGE'];
+                
+                if (imgUrl && imgUrl.trim() !== "") {
+                    // Display image if 'Image' column value is present
+                    imgElement.src = imgUrl;
+                    imgElement.classList.remove("hidden");
+                } else {
+                    // Hide the image area if no local image URL is found
+                    imgArea.classList.add("hidden");
+                }
+
+                let html = "";
+                headers.forEach((header, index) => {
+                    const val = match[header];
+                    // Skip if value is empty or header is 'image' (case insensitive)
+                    if ((!val && val !== 0) || header.toLowerCase() === 'image') return;
+                    
+                    let valueDisplay = val;
+                    let valueClass = 'text-base font-medium text-slate-700 col-span-2 break-words dark:text-slate-700-override';
+                    
+                    if (index === 0) {
+                        // Barcode/ID formatting
+                        valueDisplay = `<span class="font-mono font-bold text-lime-700 bg-lime-50 px-2 py-1 rounded-md select-all border border-lime-100 dark:bg-lime-900/50 dark:border-lime-900/80 dark:text-lime-400">${val}</span>`;
+                        valueClass = 'col-span-2 break-words';
+                    } else if (header.toLowerCase().includes("price") || header.toLowerCase().includes("mrp")) {
+                        // Price formatting
+                         valueDisplay = `<span class="font-black text-lg text-slate-800 dark:text-slate-800-override">${val}</span>`;
+                         valueClass = 'col-span-2 break-words';
+                    }
+
+                    html += `<div class="py-3 grid grid-cols-3 gap-4 items-center">
+                                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider col-span-1 dark:text-slate-400-override">${header}</span>
+                                <span class="${valueClass}">${valueDisplay}</span>
+                             </div>`;
+                });
+                document.getElementById("result-details").innerHTML = html;
+                lucide.createIcons();
+            }
+
+            function handleSearch() {
+                const idTerm = document.getElementById("id-search-input").value.trim().toLowerCase();
+                const nameTerm = document.getElementById("name-search-input").value.trim().toLowerCase();
+                const resultContainer = document.getElementById("result-container");
+                const listContainer = document.getElementById("list-container");
+                const noResultContainer = document.getElementById("no-result");
+                resultContainer.classList.add("hidden");
+                listContainer.classList.add("hidden");
+                noResultContainer.classList.add("hidden");
+
+                if (!idTerm && !nameTerm) return;
+
+                let matches = [];
+                if (idTerm) {
+                    document.getElementById("name-search-input").value = "";
+                    matches = inventory.filter(row => String(Object.values(row)[0]).toLowerCase() === idTerm);
+                } else if (nameTerm) {
+                    document.getElementById("id-search-input").value = "";
+                    if (nameTerm.length < 3) return;
+                    const tokens = nameTerm.split(/\s+/).filter(t => t);
+                    matches = inventory.filter(row => {
+                        const prodName = String(Object.values(row)[1]).toLowerCase();
+                        return tokens.every(token => prodName.includes(token));
+                    });
+                }
+
+                if (matches.length === 1) {
+                    displayItemDetails(matches[0]);
+                } else if (matches.length > 1) {
+                    listContainer.classList.remove("hidden");
+                    const matchList = document.getElementById("match-list");
+                    matchList.innerHTML = "";
+                    matches.forEach(match => {
+                        const div = document.createElement("div");
+                        // Dark Mode Hover Class added
+                        div.className = "p-4 flex justify-between items-center hover:bg-slate-50 cursor-pointer transition-colors group dark:hover:bg-[#333333]";
+                        div.innerHTML = `<div><p class="font-bold text-slate-800 group-hover:text-lime-600 transition-colors dark:text-slate-800-override">${Object.values(match)[1]}</p><p class="text-xs font-mono text-slate-400 dark:text-slate-400-override">${Object.values(match)[0]}</p></div><i data-lucide="chevron-right" class="w-5 h-5 text-slate-300 group-hover:text-lime-500 dark:text-slate-300-override"></i>`;
+                        div.onclick = () => displayItemDetails(match);
+                        matchList.appendChild(div);
+                    });
+                    lucide.createIcons();
+                } else {
+                    noResultContainer.classList.remove("hidden");
+                }
+            }
+
+            function parseCSV(text) {
+                const lines = text.split(/\r?\n/);
+                if (lines.length < 2) return [];
+                const headers = splitCSVLine(lines[0]);
+                const result = [];
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    const values = splitCSVLine(line);
+                    const entry = {};
+                    headers.forEach((h, idx) => entry[h.trim()] = values[idx] ? values[idx].trim() : "");
+                    result.push(entry);
+                }
+                return result;
+            }
+
+            function splitCSVLine(line) {
+                const values = [];
+                let current = "";
+                let inQuotes = false;
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') { inQuotes = !inQuotes; }
+                    else if (char === "," && !inQuotes) { values.push(current); current = ""; }
+                    else { current += char; }
+                }
+                values.push(current);
+                return values;
+            }
+        </script>
+    </body>
+</html>
+
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
