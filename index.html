@@ -92,7 +92,7 @@
 
                 /* Separator Overrides */
                 .dark\\:border-t-slate-100-override { border-color: #333333; }
-                /* Changed: Separator text background uses card color, not white */
+                /* Separator text background uses card color */
                 .dark\\:bg-white-override { background-color: #1a1a1a; } 
 
                 /* Result/List Item Overrides */
@@ -101,7 +101,8 @@
                 .dark\\:border-slate-50-override { border-color: #333333; }
 
                 /* Status Bar Overrides */
-                .dark\\:bg-lime-50-override { background-color: #1a1a1a; }
+                /* CHANGED: Status bar background color override set to card dark color */
+                .dark\\:bg-lime-50-override { background-color: #1a1a1a; } 
                 .dark\\:border-lime-100-override { border-color: #333333; }
                 .dark\\:text-lime-700-override { color: #A3E635; } /* Brighter lime in dark mode */
                 
@@ -282,6 +283,7 @@
                 const statusText = document.getElementById("status-text");
                 const statusDot = statusText.querySelector("span");
                 
+                // Initial Syncing State
                 statusText.innerHTML = '<span class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span> Syncing...';
                 
                 try {
@@ -297,21 +299,25 @@
                     
                     // Update status bar for online status
                     statusText.innerHTML = `<span class="w-2 h-2 rounded-full bg-lime-500"></span> Online • ${inventory.length.toLocaleString()} Items`;
-                    statusText.classList.replace("text-slate-400", "text-lime-700");
-                    statusText.classList.replace("bg-white", "bg-lime-50");
-                    statusText.classList.replace("border-slate-100", "border-lime-100");
-                    statusText.classList.remove("dark:bg-card-dark"); // Remove initial dark class if it was present
-                    statusText.classList.remove("dark:border-[#333333]"); // Remove initial dark class if it was present
-                    statusText.classList.remove("dark:text-slate-400-override"); // Remove initial dark class if it was present
+                    
+                    // --- CHANGED LOGIC START ---
+                    // Explicitly remove all light mode background/border classes on sync success
+                    statusText.classList.remove("text-slate-400", "bg-white", "border-slate-100");
+                    statusText.classList.add("text-lime-700", "bg-lime-50", "border-lime-100");
 
-                    // Add specific dark mode utility classes for the status text after successful sync
-                    statusText.classList.add("dark:bg-lime-50-override");
-                    statusText.classList.add("dark:border-lime-100-override");
-                    statusText.classList.add("dark:text-lime-700-override");
+                    // Ensure dark mode overrides are applied for the synced state
+                    statusText.classList.add("dark:bg-lime-50-override"); // Which maps to #1a1a1a (card dark)
+                    statusText.classList.add("dark:border-lime-100-override"); // Which maps to #333333
+                    statusText.classList.add("dark:text-lime-700-override"); // Which maps to #A3E635
+                    // --- CHANGED LOGIC END ---
                     
                 } catch (err) {
+                    // Sync Failed State
                     statusText.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> Sync Failed`;
                     statusText.classList.add("text-red-600");
+                    // Ensure light mode classes are removed even on fail, relying on surrounding dark background
+                    statusText.classList.remove("text-slate-400", "bg-white", "border-slate-100");
+                    statusText.classList.remove("text-lime-700", "bg-lime-50", "border-lime-100");
                 }
             }
 
