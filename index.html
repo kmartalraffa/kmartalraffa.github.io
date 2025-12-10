@@ -220,11 +220,11 @@
                 document.getElementById("result-container").classList.remove("hidden");
                 
                 const productName = Object.values(match)[1];
-                const barcode = Object.values(match)[0];
                 
                 // Set Title
                 document.getElementById("result-title").innerText = productName;
 
+                // --- IMAGE HANDLING (EXTERNAL FETCHING AND GOOGLE SEARCH REMOVED) ---
                 const imgArea = document.getElementById("image-area");
                 const imgElement = document.getElementById("product-image");
                 const googleBtn = document.getElementById("google-search-btn");
@@ -242,23 +242,11 @@
                     imgElement.classList.remove("hidden");
                     loadingText.classList.add("hidden");
                 } else {
-                    try {
-                        const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
-                        const data = await response.json();
-                        
-                        if (data.product && (data.product.image_front_url || data.product.image_url)) {
-                            imgElement.src = data.product.image_front_url || data.product.image_url;
-                            imgElement.classList.remove("hidden");
-                        } else {
-                            googleBtn.href = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(productName + " " + barcode)}`;
-                            googleBtn.classList.remove("hidden");
-                        }
-                    } catch (e) {
-                        googleBtn.href = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(productName + " " + barcode)}`;
-                        googleBtn.classList.remove("hidden");
-                    }
+                    // Hide the image area if no URL is present in the inventory data
                     loadingText.classList.add("hidden");
+                    imgArea.classList.add("hidden"); 
                 }
+                // --- END IMAGE HANDLING ---
 
                 let html = "";
                 headers.forEach((header, index) => {
@@ -358,4 +346,3 @@
         </script>
     </body>
 </html>
- 
