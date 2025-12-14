@@ -86,7 +86,6 @@
     <body class="bg-slate-50 dark:bg-black min-h-screen font-sans text-slate-800 dark:text-neutral-100 p-3 md:p-6 pb-20 transition-colors duration-300">
         <div class="max-w-lg mx-auto space-y-4">
             
-            <!-- Header card -->
             <div class="bg-white dark:bg-neutral-950 p-4 rounded-3xl shadow-sm border border-slate-100 dark:border-neutral-900 flex items-center gap-4 transition-colors">
                 <div class="p-1 rounded-2xl border-2 border-lime-100 dark:border-neutral-900 shadow-sm">
                     <img src="icon-192.jpeg" class="w-12 h-12 rounded-xl object-cover" alt="K Mart Logo">
@@ -97,20 +96,20 @@
                 </div>
             </div>
 
-            <!-- Hidden settings -->
             <div id="settings-panel" class="hidden">
                  <input id="sheet-id" type="text" value="1eEFtb7wxOOLw-TFTf_NvSFq1VQy1qYlMoVmiZkFgUys" />
                  <input id="gid-id" type="text" value="710656272" />
             </div>
 
-            <!-- Status pill -->
             <div class="flex justify-between items-center px-2">
                 <p id="status-text" class="text-xs font-semibold text-slate-400 dark:text-neutral-500 bg-white dark:bg-neutral-950 px-3 py-1.5 rounded-full border border-slate-100 dark:border-neutral-900 shadow-sm flex items-center gap-2 transition-colors">
                     <span class="w-2 h-2 rounded-full bg-slate-300 dark:bg-neutral-700 animate-pulse"></span> Initializing...
                 </p>
+                <button onclick="fetchData(true)" class="text-xs font-semibold text-slate-500 dark:text-neutral-400 hover:text-lime-600 transition-colors flex items-center gap-1">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Reload
+                </button>
             </div>
 
-            <!-- Scanner container -->
             <div id="reader-container" class="hidden fade-in shadow-lg">
                 <div id="reader"></div>
                 <div class="scan-overlay">
@@ -121,7 +120,6 @@
                 </button>
             </div>
 
-            <!-- Search card -->
             <div class="bg-white dark:bg-neutral-950 p-5 md:p-6 rounded-3xl shadow-[0_4px_20px_-10px_rgba(0,0,0,0.8)] border border-slate-100 dark:border-neutral-900 space-y-6 transition-colors">
                 <div>
                     <label class="block text-xs font-bold text-slate-400 dark:text-neutral-500 uppercase tracking-wider mb-2 ml-1">Barcode Scanner</label>
@@ -166,28 +164,25 @@
                 </div>
             </div>
 
-            <!-- Single result view -->
             <div id="result-container" class="hidden space-y-3 fade-in">
                 <div class="bg-white dark:bg-neutral-950 rounded-3xl shadow-lg border border-lime-100 dark:border-neutral-900 overflow-hidden transition-colors">
                     <div class="bg-slate-50 dark:bg-black p-5 border-b border-slate-100 dark:border-neutral-900 flex items-center gap-3 transition-colors">
                        <div class="bg-lime-500 p-2 rounded-xl text-white shadow-sm shadow-lime-500/40">
-                            <i data-lucide="check" class="w-6 h-6"></i>
+                             <i data-lucide="check" class="w-6 h-6"></i>
                        </div>
                        <div>
-                            <p class="text-[10px] font-bold text-lime-600 dark:text-lime-500 uppercase tracking-wider mb-0.5">Verified Item</p>
-                            <h2 id="result-title" class="text-xl font-black text-slate-800 dark:text-neutral-100 leading-tight">Product Name</h2>
+                             <p class="text-[10px] font-bold text-lime-600 dark:text-lime-500 uppercase tracking-wider mb-0.5">Verified Item</p>
+                             <h2 id="result-title" class="text-xl font-black text-slate-800 dark:text-neutral-100 leading-tight">Product Name</h2>
                        </div>
                     </div>
                     <div id="result-details" class="p-6 divide-y divide-slate-50 dark:divide-neutral-900"></div>
                 </div>
             </div>
 
-            <!-- Multiple matches list -->
             <div id="list-container" class="hidden space-y-3 fade-in">
                 <div id="match-list" class="bg-white dark:bg-neutral-950 rounded-3xl shadow-sm border border-slate-100 dark:border-neutral-900 divide-y divide-slate-50 dark:divide-neutral-900 overflow-hidden transition-colors"></div>
             </div>
 
-            <!-- No result -->
             <div id="no-result" class="hidden space-y-2 fade-in">
                 <div class="bg-white dark:bg-neutral-950 p-10 rounded-3xl border-2 border-dashed border-slate-200 dark:border-neutral-800 text-center transition-colors">
                     <div class="bg-slate-50 dark:bg-neutral-900 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -197,7 +192,6 @@
                 </div>
             </div>
 
-            <!-- Banner -->
             <div class="pt-4 pb-6">
                 <img src="banner.png" class="w-full rounded-2xl shadow-sm border border-slate-100 dark:border-neutral-900 object-cover" alt="K Mart Banner">
             </div>
@@ -281,152 +275,26 @@
             }
             function onScanFailure(error) {}
 
-            async function fetchData() {
+            /**
+             * Enhanced function to fetch data from Google Sheets.
+             * @param {boolean} isManual - Flag to indicate if the fetch was manually triggered.
+             */
+            async function fetchData(isManual = false) {
                 const sheetId = document.getElementById("sheet-id").value;
                 const gid = document.getElementById("gid-id").value;
                 const statusText = document.getElementById("status-text");
-                
+                const initialText = statusText.innerHTML;
+
+                // 1. Set Syncing Status
                 statusText.innerHTML = '<span class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span> Syncing...';
+                statusText.className = 'text-xs font-semibold text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 px-3 py-1.5 rounded-full border border-yellow-100 dark:border-yellow-900/50 shadow-sm flex items-center gap-2 transition-colors';
                 
                 try {
                     const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
-                    const response = await fetch(csvUrl);
-                    if (!response.ok) throw new Error("Net Error");
+                    const response = await fetch(csvUrl, { cache: isManual ? 'no-store' : 'default' }); // Force fresh data on manual reload
+                    
+                    if (!response.ok) throw new Error("Net Error / Sheet Not Found");
+                    
                     const text = await response.text();
-                    if (text.includes("<!DOCTYPE html>")) throw new Error("Check Permissions");
-                    const parsedData = parseCSV(text);
-                    if (parsedData.length === 0) throw new Error("Empty Sheet");
-                    inventory = parsedData;
-                    headers = Object.keys(parsedData[0]);
-                    
-                    statusText.innerHTML = `<span class="w-2 h-2 rounded-full bg-lime-500"></span> Online • ${inventory.length.toLocaleString()} Items`;
-                    statusText.classList.replace("text-slate-400", "text-lime-700");
-                    statusText.classList.replace("dark:text-neutral-500", "dark:text-lime-400");
-                    statusText.classList.replace("bg-white", "bg-lime-50");
-                    statusText.classList.replace("dark:bg-neutral-950", "dark:bg-lime-900/20");
-                    statusText.classList.replace("border-slate-100", "border-lime-100");
-                    statusText.classList.replace("dark:border-neutral-900", "dark:border-lime-900/50");
-                    
-                } catch (err) {
-                    statusText.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> Sync Failed`;
-                    statusText.classList.add("text-red-600");
-                }
-            }
-
-            // *** പരിഷ്കരിച്ച displayItemDetails ഫംഗ്ഷൻ ***
-            function displayItemDetails(match) {
-                document.getElementById("list-container").classList.add("hidden");
-                document.getElementById("no-result").classList.add("hidden");
-                document.getElementById("result-container").classList.remove("hidden");
-                
-                const productName = Object.values(match)[1];
-                document.getElementById("result-title").innerText = productName;
-
-                let html = "";
-                headers.forEach((header, index) => {
-                    const val = match[header];
-                    if ((!val && val !== 0) || header.toLowerCase() === 'image') return;
-                    
-                    let valueDisplay = val;
-                    if (index === 0) {
-                        valueDisplay = `<span class="font-mono font-bold text-lime-700 dark:text-lime-400 bg-lime-50 dark:bg-lime-900/30 px-2 py-1 rounded-md select-all border border-lime-100 dark:border-lime-900/50">${val}</span>`;
-                    } else if (header.toLowerCase().includes("price") || header.toLowerCase().includes("mrp")) {
-                         valueDisplay = `<span class="font-black text-lg text-slate-800 dark:text-neutral-100">${val}</span>`;
-                    }
-
-                    html += `<div class="py-3 grid grid-cols-3 gap-4 items-center">
-                                 <span class="text-[11px] font-bold text-slate-400 dark:text-neutral-500 uppercase tracking-wider col-span-1">${header}</span>
-                                 <span class="text-base font-medium text-slate-700 dark:text-neutral-300 col-span-2 break-words">${valueDisplay}</span>
-                             </div>`;
-                });
-                document.getElementById("result-details").innerHTML = html;
-                lucide.createIcons();
-            }
-            // *** പരിഷ്കരിച്ച displayItemDetails ഫംഗ്ഷൻ ഇവിടെ അവസാനിക്കുന്നു ***
-
-            function handleSearch() {
-                const idTerm = document.getElementById("id-search-input").value.trim().toLowerCase();
-                const nameTerm = document.getElementById("name-search-input").value.trim().toLowerCase();
-                const resultContainer = document.getElementById("result-container");
-                const listContainer = document.getElementById("list-container");
-                const noResultContainer = document.getElementById("no-result");
-                resultContainer.classList.add("hidden");
-                listContainer.classList.add("hidden");
-                noResultContainer.classList.add("hidden");
-
-                if (!idTerm && !nameTerm) return;
-
-                let matches = [];
-                if (idTerm) {
-                    document.getElementById("name-search-input").value = "";
-                    matches = inventory.filter(row => String(Object.values(row)[0]).toLowerCase() === idTerm);
-                } else if (nameTerm) {
-                    document.getElementById("id-search-input").value = "";
-                    if (nameTerm.length < 3) return;
-                    const tokens = nameTerm.split(/\s+/).filter(t => t);
-                    matches = inventory.filter(row => {
-                        const prodName = String(Object.values(row)[1]).toLowerCase();
-                        return tokens.every(token => prodName.includes(token));
-                    });
-                }
-
-                if (matches.length === 1) {
-                    displayItemDetails(matches[0]);
-                } else if (matches.length > 1) {
-                    listContainer.classList.remove("hidden");
-                    const matchList = document.getElementById("match-list");
-                    matchList.innerHTML = "";
-                    matches.forEach(match => {
-                        const div = document.createElement("div");
-                        div.className = "p-4 flex justify-between items-center hover:bg-slate-50 dark:hover:bg-neutral-900 cursor-pointer transition-colors group";
-                        div.innerHTML = `<div>
-                                            <p class="font-bold text-slate-800 dark:text-neutral-100 group-hover:text-lime-600 transition-colors">${Object.values(match)[1]}</p>
-                                            <p class="text-xs font-mono text-slate-400 dark:text-neutral-500">${Object.values(match)[0]}</p>
-                                         </div>
-                                         <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300 dark:text-neutral-600 group-hover:text-lime-500"></i>`;
-                        div.onclick = () => displayItemDetails(match);
-                        matchList.appendChild(div);
-                    });
-                    lucide.createIcons();
-                } else {
-                    noResultContainer.classList.remove("hidden");
-                }
-            }
-
-            function parseCSV(text) {
-                const lines = text.split(/\r?\n/);
-                if (lines.length < 2) return [];
-                const headers = splitCSVLine(lines[0]);
-                const result = [];
-                for (let i = 1; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (!line) continue;
-                    const values = splitCSVLine(line);
-                    const entry = {};
-                    headers.forEach((h, idx) => entry[h].trim?.() ? entry[h.trim()] = values[idx] ? values[idx].trim() : "" : entry[h] = values[idx] ? values[idx].trim() : "");
-                    result.push(entry);
-                }
-                return result;
-            }
-
-            function splitCSVLine(line) {
-                const values = [];
-                let current = "";
-                let inQuotes = false;
-                for (let i = 0; i < line.length; i++) {
-                    const char = line[i];
-                    if (char === '"') { 
-                        inQuotes = !inQuotes; 
-                    } else if (char === "," && !inQuotes) { 
-                        values.push(current); 
-                        current = ""; 
-                    } else { 
-                        current += char; 
-                    }
-                }
-                values.push(current);
-                return values;
-            }
-        </script>
-    </body>
-</html>
+                    // Check for HTML response, indicating a permission issue or wrong Sheet ID/GID
+                    if (text.trim
