@@ -6,7 +6,8 @@
         <title>K MART AL RAFFA - Item Master</title>
         
         <link rel="manifest" href="manifest.json">
-        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111827">         <link rel="apple-touch-icon" href="icon-192.jpeg">
+        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111827"> 
+        <link rel="apple-touch-icon" href="icon-192.jpeg">
         <link rel="icon" type="image/png" href="icon-512.png">
 
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
@@ -20,53 +21,44 @@
                 -webkit-user-select: none; 
                 user-select: none; 
                 -webkit-tap-highlight-color: transparent; 
-                /* പശ്ചാത്തലത്തിൻ്റെ മുകളിലെ ഭാഗം: ഡാർക്ക് നീല/ഗ്രേ */
                 background-color: #111827;
                 background-image: linear-gradient(to bottom, #1f2937 0%, #111827 300px); 
             }
             @media (prefers-color-scheme: light) {
-                body { 
-                    background-color: #f3f4f6;
-                    background-image: none;
-                }
+                body { background-color: #f3f4f6; background-image: none; }
             }
 
-            .old-card {
-                /* നിങ്ങളുടെ ചിത്രത്തിലെ പഴയ കാർഡ് ഷാഡോ അനുകരിക്കുന്നു */
-                border-radius: 2rem; /* 32px */
+            /* പുതിയ കാർഡ് ക്ലാസ്: Medium Rounding (rounded-2xl: 16px) */
+            .app-card {
+                border-radius: 1rem; /* 16px */
                 box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-                background-color: #1f2937; /* Dark Gray Card */
+                background-color: #1f2937; 
+                transition: all 0.3s ease-in-out; /* Transition ചേർത്തിരിക്കുന്നു */
             }
-            .dark .old-card {
+            .dark .app-card {
                 background-color: #1f2937;
                 box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
             }
 
-            .scan-overlay { /* Indigo Accent */
-                border: 4px solid #818cf8; 
-                box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6);
-            }
-            .scan-line { /* Indigo Accent */
-                background: #818cf8; 
-                box-shadow: 0 0 10px #818cf8;
-            }
-
+            /* സ്കാനർ സ്റ്റൈൽ: മാറ്റമില്ല */
+            .scan-overlay { border: 4px solid #818cf8; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6); }
+            .scan-line { background: #818cf8; box-shadow: 0 0 10px #818cf8; }
             @keyframes scanMove { from { transform: translateY(-50px); } to { transform: translateY(50px); } }
             #reader video { width: 100% !important; height: 250px !important; object-fit: cover !important; }
-
+            #reader-container { border-radius: 1rem; }
         </style>
     </head>
     
-        <body class="dark:bg-gray-900 min-h-screen font-sans text-gray-800 dark:text-gray-200 p-4 md:p-8 pb-20 transition-colors duration-300">
-                <div class="max-w-md mx-auto space-y-6 text-center">
+    <body class="dark:bg-gray-900 min-h-screen font-sans text-gray-800 dark:text-gray-200 p-4 md:p-8 pb-20 transition-colors duration-300">
+        <div class="max-w-md mx-auto space-y-6 text-center">
             
-                        <header class="old-card p-4 inline-flex justify-center items-center gap-4 border border-gray-700/50 shadow-2xl">
-                <div class="p-1.5 rounded-2xl bg-indigo-50 dark:bg-indigo-900/40 shadow-sm">
-                    <img src="icon-192.jpeg" class="w-12 h-12 rounded-xl object-cover" alt="K Mart Logo">
+                        <header class="app-card p-4 inline-flex justify-center items-center gap-4 border border-gray-700/50 shadow-2xl">
+                <div class="p-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-900/40 shadow-sm">
+                    <img src="icon-192.jpeg" class="w-12 h-12 rounded-lg object-cover" alt="K Mart Logo">
                 </div>
                 <div class="text-left">
                     <h1 class="font-extrabold text-3xl text-white leading-none tracking-tight">K MART</h1>
-                                        <p class="text-xs font-bold text-indigo-400 uppercase tracking-widest mt-1">Al Raffa • Item Master</p>
+                    <p class="text-xs font-bold text-indigo-400 uppercase tracking-widest mt-1">Al Raffa • Item Master</p>
                 </div>
             </header>
 
@@ -81,7 +73,7 @@
                 </p>
             </div>
 
-                        <div id="reader-container" class="hidden fade-in shadow-xl mx-auto max-w-sm" style="border-radius: 2rem;">
+                        <div id="reader-container" class="hidden fade-in shadow-xl mx-auto max-w-sm">
                     <div id="reader"></div>
                     <div class="scan-overlay"><div class="scan-line"></div></div>
                     <button onclick="stopCamera()" class="absolute top-4 right-4 bg-black/50 backdrop-blur-sm p-2 rounded-full text-white hover:bg-black/70 z-20 transition-all">
@@ -89,14 +81,14 @@
                     </button>
             </div>
 
-                        <div class="old-card p-6 space-y-6 text-left border border-gray-700/50 shadow-2xl">
+                        <div class="app-card p-6 space-y-6 text-left border border-gray-700/50 shadow-2xl">
                 
                                 <div>
                     <label class="block text-sm font-semibold text-gray-400 mb-3 ml-1 uppercase tracking-wider">Barcode Scanner</label>
                     <div class="flex gap-4 items-center">
                         <div class="relative flex-grow">
                             <i data-lucide="scan-barcode" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5 z-10"></i>
-                                                        <input id="id-search-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Tap camera ->" class="w-full pl-12 pr-4 py-3.5 text-lg border border-gray-600 bg-gray-800 text-white rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 outline-none font-sans transition-all placeholder:text-gray-500" oninput="handleSearch()" />
+                                                        <input id="id-search-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Tap camera ->" class="w-full pl-12 pr-4 py-3.5 text-lg border border-gray-600 bg-gray-800 text-white rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 outline-none font-sans transition-all placeholder:text-gray-500" oninput="handleSearch()" />
                         </div>
                                                 <button id="camera-toggle-btn" onclick="toggleCamera()" class="bg-indigo-500 text-white p-4 rounded-xl hover:bg-indigo-600 active:scale-95 transition-all shadow-lg shadow-indigo-500/50 flex-shrink-0">
                             <i data-lucide="camera" class="w-7 h-7"></i>
@@ -111,13 +103,13 @@
                                 <div>
                     <div class="relative">
                         <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5 z-10"></i>
-                                                <input id="name-search-input" type="text" placeholder="Type product name..." class="w-full pl-12 pr-4 py-3.5 text-lg border border-gray-600 bg-gray-800 text-white rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 outline-none transition-all placeholder:text-gray-500" oninput="handleSearch()" />
+                                                <input id="name-search-input" type="text" placeholder="Type product name..." class="w-full pl-12 pr-4 py-3.5 text-lg border border-gray-600 bg-gray-800 text-white rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 outline-none transition-all placeholder:text-gray-500" oninput="handleSearch()" />
                     </div>
                 </div>
             </div>
 
                         <div id="result-container" class="hidden space-y-3 fade-in">
-                                <div class="old-card p-6 border-2 border-indigo-500/0 hover:border-indigo-500/30 transition-all overflow-hidden text-left">
+                                <div class="app-card p-6 border-2 border-indigo-500/0 hover:border-indigo-500/30 transition-all overflow-hidden text-left">
                     
                                         <div class="border-b border-gray-700 pb-4 mb-4">
                        <h2 id="result-title" class="text-3xl font-black text-white leading-tight">Product Name</h2>
@@ -128,20 +120,20 @@
             </div>
 
                         <div id="list-container" class="hidden space-y-3 fade-in">
-                                <div id="match-list" class="old-card divide-y divide-gray-700 overflow-hidden text-left border border-gray-700/50 shadow-2xl"></div>
+                                <div id="match-list" class="app-card divide-y divide-gray-700 overflow-hidden text-left border border-gray-700/50 shadow-2xl"></div>
             </div>
 
                         <div id="no-result" class="hidden space-y-2 fade-in">
-                                <div class="old-card p-10 border-2 border-dashed border-gray-700 text-center">
+                                <div class="app-card p-10 border-2 border-dashed border-gray-700 text-center">
                     <div class="bg-gray-700 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                         <i data-lucide="package-search" class="text-gray-400 w-8 h-8"></i>
-                    </div>
+                      </div>
                     <p class="font-semibold text-gray-400">Item not found in database. Try using a different search term or scanning again.</p>
                 </div>
             </div>
 
             <div class="pt-4 pb-6">
-                <img src="banner.png" class="w-full rounded-2xl shadow-sm border border-gray-700 object-cover" alt="K Mart Banner">
+                <img src="banner.png" class="w-full rounded-xl shadow-sm border border-gray-700 object-cover" alt="K Mart Banner">
             </div>
 
         </div>
