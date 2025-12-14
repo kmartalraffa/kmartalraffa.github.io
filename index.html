@@ -115,24 +115,14 @@
             <div id="result-container" class="hidden space-y-3 fade-in">
                 <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-lg border border-lime-100 dark:border-slate-700 overflow-hidden transition-colors">
                     
-                    <div id="image-area" class="bg-white dark:bg-slate-900 p-6 flex flex-col items-center justify-center border-b border-slate-50 dark:border-slate-800 min-h-[160px] hidden relative">
-                        <div class="absolute inset-0 bg-gradient-to-b from-lime-50/50 dark:from-lime-900/10 to-transparent"></div>
-                        <img id="product-image" src="" alt="Product" class="relative z-10 max-h-52 object-contain rounded-xl shadow-sm mb-3 hover:scale-105 transition-transform duration-300" />
-                        
-                        <a id="google-search-btn" href="#" target="_blank" class="hidden relative z-10 text-xs flex items-center gap-1.5 text-lime-700 dark:text-lime-300 bg-lime-100 dark:bg-lime-900/30 px-4 py-2 rounded-full hover:bg-lime-200 dark:hover:bg-lime-900/50 transition-colors font-semibold">
-                            <i data-lucide="globe" class="w-3.5 h-3.5"></i> Find on Google
-                        </a>
-                        <p id="image-loading" class="text-xs text-slate-400 animate-pulse hidden">Searching...</p>
-                    </div>
-
                     <div class="bg-slate-50 dark:bg-slate-950 p-5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3 transition-colors">
-                         <div class="bg-lime-500 p-2 rounded-xl text-white shadow-sm shadow-lime-500/40">
-                             <i data-lucide="check" class="w-6 h-6"></i>
-                         </div>
-                         <div>
+                       <div class="bg-lime-500 p-2 rounded-xl text-white shadow-sm shadow-lime-500/40">
+                            <i data-lucide="check" class="w-6 h-6"></i>
+                       </div>
+                       <div>
                             <p class="text-[10px] font-bold text-lime-600 dark:text-lime-500 uppercase tracking-wider mb-0.5">Verified Item</p>
                             <h2 id="result-title" class="text-xl font-black text-slate-800 dark:text-white leading-tight">Product Name</h2>
-                         </div>
+                       </div>
                     </div>
                     <div id="result-details" class="p-6 divide-y divide-slate-50 dark:divide-slate-800"></div>
                 </div>
@@ -245,53 +235,19 @@
                 }
             }
 
-            async function displayItemDetails(match) {
+            // *** പരിഷ്കരിച്ച displayItemDetails ഫംഗ്ഷൻ ***
+            function displayItemDetails(match) {
                 document.getElementById("list-container").classList.add("hidden");
                 document.getElementById("no-result").classList.add("hidden");
                 document.getElementById("result-container").classList.remove("hidden");
                 
                 const productName = Object.values(match)[1];
-                const barcode = Object.values(match)[0];
                 document.getElementById("result-title").innerText = productName;
-
-                const imgArea = document.getElementById("image-area");
-                const imgElement = document.getElementById("product-image");
-                const googleBtn = document.getElementById("google-search-btn");
-                const loadingText = document.getElementById("image-loading");
-                
-                imgArea.classList.remove("hidden");
-                imgElement.classList.add("hidden");
-                googleBtn.classList.add("hidden");
-                loadingText.classList.remove("hidden"); 
-
-                let imgUrl = match['Image'] || match['image'] || match['IMAGE'];
-                
-                if (imgUrl && imgUrl.trim() !== "") {
-                    imgElement.src = imgUrl;
-                    imgElement.classList.remove("hidden");
-                    loadingText.classList.add("hidden");
-                } else {
-                    try {
-                        const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
-                        const data = await response.json();
-                        
-                        if (data.product && (data.product.image_front_url || data.product.image_url)) {
-                            imgElement.src = data.product.image_front_url || data.product.image_url;
-                            imgElement.classList.remove("hidden");
-                        } else {
-                            googleBtn.href = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(productName + " " + barcode)}`;
-                            googleBtn.classList.remove("hidden");
-                        }
-                    } catch (e) {
-                        googleBtn.href = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(productName + " " + barcode)}`;
-                        googleBtn.classList.remove("hidden");
-                    }
-                    loadingText.classList.add("hidden");
-                }
 
                 let html = "";
                 headers.forEach((header, index) => {
                     const val = match[header];
+                    // 'Image' ഹെഡർ ഒഴിവാക്കുന്നു
                     if ((!val && val !== 0) || header.toLowerCase() === 'image') return;
                     
                     let valueDisplay = val;
@@ -302,13 +258,15 @@
                     }
 
                     html += `<div class="py-3 grid grid-cols-3 gap-4 items-center">
-                                <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider col-span-1">${header}</span>
-                                <span class="text-base font-medium text-slate-700 dark:text-slate-300 col-span-2 break-words">${valueDisplay}</span>
-                             </div>`;
+                                 <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider col-span-1">${header}</span>
+                                 <span class="text-base font-medium text-slate-700 dark:text-slate-300 col-span-2 break-words">${valueDisplay}</span>
+                               </div>`;
                 });
                 document.getElementById("result-details").innerHTML = html;
                 lucide.createIcons();
             }
+            // *** പരിഷ്കരിച്ച displayItemDetails ഫംഗ്ഷൻ ഇവിടെ അവസാനിക്കുന്നു ***
+
 
             function handleSearch() {
                 const idTerm = document.getElementById("id-search-input").value.trim().toLowerCase();
