@@ -485,6 +485,50 @@
     values.push(current);
     return values;
   }
+  /* ---------------- DARK MODE LOGO SWITCH (2 Sizes) ---------------- */
+
+// ഡാർക്ക് മോഡ് ഓണാണോ എന്ന് പരിശോധിക്കുന്നു
+const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+// 1. വലിയ ലോഗോ എലമെൻ്റ് കണ്ടെത്തുന്നു (ഉദാഹരണത്തിന്, Header-ലെ ലോഗോ)
+const bigLogoElement = document.querySelector('.w-12.h-12'); // നിങ്ങളുടെ സ്ക്രീൻഷോട്ടിലെ class
+// 2. മൊബൈൽ ഐക്കൺ അല്ലെങ്കിൽ ചെറിയ ലോഗോ എലമെൻ്റ് കണ്ടെത്തുന്നു (ഇവിടെ ബാനർ ഒഴിവാക്കുന്നു)
+// നിങ്ങൾക്ക് index.html-ൽ വേറെ ലോഗോ എലമെൻ്റ് ഉണ്ടെങ്കിൽ, അതിൻ്റെ class/id ഉപയോഗിക്കുക
+
+function updateLogo(isDarkMode) {
+    // വലിയ ലോഗോയുടെ മാറ്റം
+    if (bigLogoElement) {
+        if (isDarkMode) {
+            // ഡാർക്ക് മോഡ്: കറുപ്പ് പശ്ചാത്തലത്തിൽ വെള്ള ലോഗോയുടെ ഫയൽ
+            bigLogoElement.src = 'icon-dark-512.png'; // 512px പോലെ വലുപ്പമുള്ളത്
+        } else {
+            // ലൈറ്റ് മോഡ്: വെള്ള പശ്ചാത്തലത്തിൽ പച്ച ലോഗോയുടെ ഫയൽ
+            bigLogoElement.src = 'icon-512.png'; // നിങ്ങളുടെ icon-512.png പോലുള്ളത്
+        }
+    }
+
+    // ചെറിയ ലോഗോയുടെ മാറ്റം (ഉദാഹരണത്തിന്, 192px ലോഗോക്ക്)
+    // നിലവിൽ നിങ്ങളുടെ കോഡിൽ ഒരൊറ്റ ലോഗോ എലമെൻ്റേ ഉള്ളൂ. 
+    // വേറെ ലോഗോ ഉണ്ടെങ്കിൽ, ഇവിടെ അതിൻ്റെ കോഡ് ചേർക്കാം.
+
+    // ഉദാഹരണത്തിന്:
+    // if (smallLogoElement) {
+    //     if (isDarkMode) {
+    //         smallLogoElement.src = 'icon-dark-192.jpeg'; 
+    //     } else {
+    //         smallLogoElement.src = 'icon-192.jpeg'; 
+    //     }
+    // }
+}
+
+// 1. പേജ് ലോഡ് ചെയ്യുമ്പോൾ നിലവിലെ മോഡ് അനുസരിച്ച് ലോഗോ സജ്ജമാക്കുന്നു
+updateLogo(darkModeMediaQuery.matches);
+
+// 2. യൂസർ ഫോണിൻ്റെ മോഡ് മാറ്റുമ്പോൾ ഓട്ടോമാറ്റിക്കായി മാറാൻ വേണ്ടി
+darkModeMediaQuery.addEventListener('change', (e) => {
+    updateLogo(e.matches);
+});
+
 </script>
 
 </body>
