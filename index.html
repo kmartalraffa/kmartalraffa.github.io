@@ -6,8 +6,7 @@
         <title>K MART AL RAFFA - Item Master</title>
         
         <link rel="manifest" href="manifest.json">
-        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#4f46e5">         <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1f2937">
-        <link rel="apple-touch-icon" href="icon-192.jpeg">
+        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#111827">         <link rel="apple-touch-icon" href="icon-192.jpeg">
         <link rel="icon" type="image/png" href="icon-512.png">
 
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
@@ -21,57 +20,53 @@
                 -webkit-user-select: none; 
                 user-select: none; 
                 -webkit-tap-highlight-color: transparent; 
+                /* പശ്ചാത്തലത്തിൻ്റെ മുകളിലെ ഭാഗം: ഡാർക്ക് നീല/ഗ്രേ */
+                background-color: #111827;
+                background-image: linear-gradient(to bottom, #1f2937 0%, #111827 300px); 
             }
-            
-            /* Scrollbar Styling (Indigo Accent) */
-            ::-webkit-scrollbar { width: 6px; }
-            ::-webkit-scrollbar-track { background: #f7f7ff; } /* Light background */
-            ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 3px; } /* Indigo 500 */
-            
-            @media (prefers-color-scheme: dark) {
-                ::-webkit-scrollbar-track { background: #111827; } /* gray-900 */
-                ::-webkit-scrollbar-thumb { background: #374151; } /* gray-700 */
+            @media (prefers-color-scheme: light) {
+                body { 
+                    background-color: #f3f4f6;
+                    background-image: none;
+                }
             }
 
-            .fade-in { animation: fadeIn 0.3s ease-out; }
-            @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-            
-            /* സ്കാനർ കണ്ടെയ്‌നർ (Indigo Accent) */
-            #reader-container {
-                position: relative; width: 100%; height: 250px;
-                overflow: hidden;
-                border-radius: 1.5rem;
-                border: 4px solid #818cf8; /* Indigo 400 */
-                background: #1f2937;
+            .old-card {
+                /* നിങ്ങളുടെ ചിത്രത്തിലെ പഴയ കാർഡ് ഷാഡോ അനുകരിക്കുന്നു */
+                border-radius: 2rem; /* 32px */
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+                background-color: #1f2937; /* Dark Gray Card */
             }
-            #reader video { width: 100% !important; height: 250px !important; object-fit: cover !important; }
-            
-            /* Indigo ഓവർലേയും സ്കാൻ ലൈനും */
-            .scan-overlay {
-                position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-                width: 85%; height: 100px;
-                border: 2px solid rgba(99, 102, 241, 0.9); /* Indigo 500 */
+            .dark .old-card {
+                background-color: #1f2937;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
+            }
+
+            .scan-overlay { /* Indigo Accent */
+                border: 4px solid #818cf8; 
                 box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6);
-                border-radius: 16px; pointer-events: none; z-index: 10;
             }
-            .scan-line {
-                width: 100%; height: 3px; background: #818cf8; /* Indigo 400 */
+            .scan-line { /* Indigo Accent */
+                background: #818cf8; 
                 box-shadow: 0 0 10px #818cf8;
-                animation: scanMove 2s infinite linear;
             }
+
+            @keyframes scanMove { from { transform: translateY(-50px); } to { transform: translateY(50px); } }
+            #reader video { width: 100% !important; height: 250px !important; object-fit: cover !important; }
+
         </style>
     </head>
     
-        <body class="bg-gray-50 dark:bg-gray-900 min-h-screen font-sans text-gray-800 dark:text-gray-200 p-4 md:p-8 pb-20 transition-colors duration-300">
-        <div class="max-w-xl mx-auto space-y-6">
+        <body class="dark:bg-gray-900 min-h-screen font-sans text-gray-800 dark:text-gray-200 p-4 md:p-8 pb-20 transition-colors duration-300">
+                <div class="max-w-md mx-auto space-y-6 text-center">
             
-                        <header class="bg-white dark:bg-gray-800 p-4 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 flex items-center gap-4 transition-colors">
-                <div class="p-1.5 rounded-2xl border-2 border-indigo-200 dark:border-indigo-700 shadow-sm">
+                        <header class="old-card p-4 inline-flex justify-center items-center gap-4 border border-gray-700/50 shadow-2xl">
+                <div class="p-1.5 rounded-2xl bg-indigo-50 dark:bg-indigo-900/40 shadow-sm">
                     <img src="icon-192.jpeg" class="w-12 h-12 rounded-xl object-cover" alt="K Mart Logo">
                 </div>
-                <div>
-                    <h1 class="font-extrabold text-3xl text-gray-900 dark:text-white leading-none tracking-tight">K MART</h1>
-                                        <p class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mt-1">Al Raffa • Item Master Lookup</p>
+                <div class="text-left">
+                    <h1 class="font-extrabold text-3xl text-white leading-none tracking-tight">K MART</h1>
+                                        <p class="text-xs font-bold text-indigo-400 uppercase tracking-widest mt-1">Al Raffa • Item Master</p>
                 </div>
             </header>
 
@@ -80,13 +75,13 @@
                  <input id="gid-id" type="text" value="710656272" />
             </div>
 
-                        <div class="flex justify-start items-center">
-                <p id="status-text" class="text-xs font-semibold text-gray-400 dark:text-gray-500 bg-white dark:bg-gray-800 px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm flex items-center gap-2 transition-colors">
-                    <span class="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600 animate-pulse"></span> Initializing...
+                        <div class="flex justify-center">
+                <p id="status-text" class="text-xs font-semibold text-gray-400 bg-gray-800 px-3 py-1.5 rounded-full flex items-center gap-2 transition-colors">
+                    <span class="w-2 h-2 rounded-full bg-gray-600 animate-pulse"></span> Initializing...
                 </p>
             </div>
 
-                        <div id="reader-container" class="hidden fade-in shadow-xl">
+                        <div id="reader-container" class="hidden fade-in shadow-xl mx-auto max-w-sm" style="border-radius: 2rem;">
                     <div id="reader"></div>
                     <div class="scan-overlay"><div class="scan-line"></div></div>
                     <button onclick="stopCamera()" class="absolute top-4 right-4 bg-black/50 backdrop-blur-sm p-2 rounded-full text-white hover:bg-black/70 z-20 transition-all">
@@ -94,65 +89,59 @@
                     </button>
             </div>
 
-                        <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 space-y-6 transition-colors">
+                        <div class="old-card p-6 space-y-6 text-left border border-gray-700/50 shadow-2xl">
                 
                                 <div>
-                    <label class="block text-sm font-semibold text-gray-400 dark:text-gray-500 mb-2 ml-1">Search by Barcode / ID</label>
-                    <div class="flex gap-3">
+                    <label class="block text-sm font-semibold text-gray-400 mb-3 ml-1 uppercase tracking-wider">Barcode Scanner</label>
+                    <div class="flex gap-4 items-center">
                         <div class="relative flex-grow">
-                            <i data-lucide="scan-barcode" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-600 w-6 h-6 z-10"></i>
-                                                        <input id="id-search-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Scan or type Barcode number..." class="w-full pl-12 pr-4 py-4 text-xl border-2 border-gray-200 dark:border-gray-600 bg-transparent dark:text-white rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none font-mono transition-all placeholder:text-gray-400 dark:placeholder:text-gray-600" oninput="handleSearch()" />
+                            <i data-lucide="scan-barcode" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5 z-10"></i>
+                                                        <input id="id-search-input" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Tap camera ->" class="w-full pl-12 pr-4 py-3.5 text-lg border border-gray-600 bg-gray-800 text-white rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 outline-none font-sans transition-all placeholder:text-gray-500" oninput="handleSearch()" />
                         </div>
-                                                <button id="camera-toggle-btn" onclick="toggleCamera()" class="bg-indigo-500 text-white p-4 rounded-2xl hover:bg-indigo-600 active:scale-95 transition-all shadow-xl shadow-indigo-500/50 flex-shrink-0">
+                                                <button id="camera-toggle-btn" onclick="toggleCamera()" class="bg-indigo-500 text-white p-4 rounded-xl hover:bg-indigo-600 active:scale-95 transition-all shadow-lg shadow-indigo-500/50 flex-shrink-0">
                             <i data-lucide="camera" class="w-7 h-7"></i>
                         </button>
                     </div>
                 </div>
                 
-                                <div class="relative flex justify-center items-center">
-                    <div class="absolute inset-0 border-t border-gray-200 dark:border-gray-700"></div>
-                    <span class="relative bg-white dark:bg-gray-800 px-4 text-[10px] font-bold text-gray-300 dark:text-gray-600 uppercase tracking-widest transition-colors">OR NAME SEARCH (MIN 3 CHARS)</span>
+                                <div class="text-center">
+                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">OR SEARCH BY NAME</span>
                 </div>
 
                                 <div>
                     <div class="relative">
-                        <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-600 w-5 h-5 z-10"></i>
-                                                <input id="name-search-input" type="text" placeholder="Type product name..." class="w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-200 dark:border-gray-600 bg-transparent dark:text-white rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all placeholder:text-gray-400 dark:placeholder:text-gray-600" oninput="handleSearch()" />
+                        <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5 z-10"></i>
+                                                <input id="name-search-input" type="text" placeholder="Type product name..." class="w-full pl-12 pr-4 py-3.5 text-lg border border-gray-600 bg-gray-800 text-white rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 outline-none transition-all placeholder:text-gray-500" oninput="handleSearch()" />
                     </div>
                 </div>
             </div>
 
                         <div id="result-container" class="hidden space-y-3 fade-in">
-                                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl border border-indigo-200 dark:border-indigo-600 overflow-hidden transition-colors">
+                                <div class="old-card p-6 border-2 border-indigo-500/0 hover:border-indigo-500/30 transition-all overflow-hidden text-left">
                     
-                                        <div class="bg-gray-50 dark:bg-gray-900 p-5 border-b border-gray-200 dark:border-gray-700 flex items-center gap-4 transition-colors">
-                       <div class="bg-indigo-500 p-2.5 rounded-xl text-white shadow-md shadow-indigo-500/40">
-                            <i data-lucide="check-circle" class="w-7 h-7"></i>
-                       </div>
-                       <div>
-                                                        <p class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-0.5">Item Found</p>
-                            <h2 id="result-title" class="text-2xl font-black text-gray-900 dark:text-white leading-tight">Product Name</h2>
-                       </div>
+                                        <div class="border-b border-gray-700 pb-4 mb-4">
+                       <h2 id="result-title" class="text-3xl font-black text-white leading-tight">Product Name</h2>
+                        <p class="text-xs font-semibold text-indigo-400 uppercase tracking-widest mt-1">Found in Database</p>
                     </div>
-                                        <div id="result-details" class="p-6 divide-y divide-gray-100 dark:divide-gray-700"></div>
+                                        <div id="result-details" class="divide-y divide-gray-700"></div>
                 </div>
             </div>
 
                         <div id="list-container" class="hidden space-y-3 fade-in">
-                                <div id="match-list" class="bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700 overflow-hidden transition-colors"></div>
+                                <div id="match-list" class="old-card divide-y divide-gray-700 overflow-hidden text-left border border-gray-700/50 shadow-2xl"></div>
             </div>
 
                         <div id="no-result" class="hidden space-y-2 fade-in">
-                                <div class="bg-white dark:bg-gray-800 p-10 rounded-3xl border-2 border-dashed border-gray-300 dark:border-gray-700 text-center transition-colors">
-                    <div class="bg-gray-100 dark:bg-gray-700 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i data-lucide="package-search" class="text-gray-400 dark:text-gray-500 w-8 h-8"></i>
+                                <div class="old-card p-10 border-2 border-dashed border-gray-700 text-center">
+                    <div class="bg-gray-700 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="package-search" class="text-gray-400 w-8 h-8"></i>
                     </div>
-                    <p class="font-semibold text-gray-500 dark:text-gray-400">Item not found in database. Try using a different search term or scanning again.</p>
+                    <p class="font-semibold text-gray-400">Item not found in database. Try using a different search term or scanning again.</p>
                 </div>
             </div>
 
             <div class="pt-4 pb-6">
-                <img src="banner.png" class="w-full rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 object-cover" alt="K Mart Banner">
+                <img src="banner.png" class="w-full rounded-2xl shadow-sm border border-gray-700 object-cover" alt="K Mart Banner">
             </div>
 
         </div>
@@ -217,7 +206,7 @@
                 const gid = document.getElementById("gid-id").value;
                 const statusText = document.getElementById("status-text");
                 
-                statusText.innerHTML = '<span class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span> Syncing...';
+                statusText.innerHTML = `<span class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span> Syncing...`;
                 
                 try {
                     const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
@@ -232,16 +221,13 @@
                     
                     // സ്റ്റാറ്റസ് ടെക്സ്റ്റ് ക്ലാസ്സുകൾ (Indigo Accent)
                     statusText.innerHTML = `<span class="w-2 h-2 rounded-full bg-indigo-500"></span> Online • ${inventory.length.toLocaleString()} Items`;
-                    statusText.classList.replace("text-gray-400", "text-indigo-700");
-                    statusText.classList.replace("dark:text-gray-500", "dark:text-indigo-400");
-                    statusText.classList.replace("bg-white", "bg-indigo-50");
-                    statusText.classList.replace("dark:bg-gray-800", "dark:bg-indigo-900/20");
-                    statusText.classList.replace("border-gray-200", "border-indigo-100");
-                    statusText.classList.replace("dark:border-gray-700", "dark:border-indigo-900/50");
+                    statusText.classList.replace("text-gray-400", "text-indigo-400");
+                    statusText.classList.replace("bg-gray-800", "bg-indigo-900/40");
                     
                 } catch (err) {
                     statusText.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> Sync Failed`;
-                    statusText.classList.add("text-red-600");
+                    statusText.classList.add("text-red-500");
+                    statusText.classList.replace("bg-gray-800", "bg-red-900/40");
                 }
             }
 
@@ -261,15 +247,15 @@
                     let valueDisplay = val;
                     // Barcode/ID ഹൈലൈറ്റ് (Indigo Accent)
                     if (index === 0) {
-                        valueDisplay = `<span class="font-mono font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-1 rounded-md select-all border border-indigo-100 dark:border-indigo-800">${val}</span>`;
+                        valueDisplay = `<span class="font-mono font-bold text-indigo-300 bg-indigo-900/30 px-2 py-1 rounded-md select-all">${val}</span>`;
                         // വില ഹൈലൈറ്റ് (Amber/Gold for price)
                     } else if (header.toLowerCase().includes("price") || header.toLowerCase().includes("mrp")) {
-                         valueDisplay = `<span class="font-black text-xl text-gray-900 dark:text-amber-300">${val}</span>`;
+                         valueDisplay = `<span class="font-black text-xl text-amber-300">${val}</span>`;
                     }
 
                     html += `<div class="py-3 grid grid-cols-3 gap-4 items-center">
-                                 <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider col-span-1">${header}</span>
-                                 <span class="text-base font-medium text-gray-700 dark:text-gray-300 col-span-2 break-words">${valueDisplay}</span>
+                                 <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider col-span-1">${header}</span>
+                                 <span class="text-base font-medium text-gray-300 col-span-2 break-words">${valueDisplay}</span>
                                </div>`;
                 });
                 document.getElementById("result-details").innerHTML = html;
@@ -312,9 +298,9 @@
                     matchList.innerHTML = "";
                     matches.forEach(match => {
                         const div = document.createElement("div");
-                        // ലിസ്റ്റ് ഐറ്റം: Indigo Accent
-                        div.className = "p-4 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors group";
-                        div.innerHTML = `<div><p class="font-bold text-gray-900 dark:text-gray-200 group-hover:text-indigo-600 transition-colors">${Object.values(match)[1]}</p><p class="text-xs font-mono text-gray-400 dark:text-gray-500">${Object.values(match)[0]}</p></div><i data-lucide="chevron-right" class="w-5 h-5 text-gray-300 dark:text-gray-600 group-hover:text-indigo-500"></i>`;
+                        // ലിസ്റ്റ് ഐറ്റം: Indigo Accent Hover
+                        div.className = "p-4 flex justify-between items-center hover:bg-gray-800/50 cursor-pointer transition-colors group";
+                        div.innerHTML = `<div><p class="font-bold text-white group-hover:text-indigo-400 transition-colors">${Object.values(match)[1]}</p><p class="text-xs font-mono text-gray-500">${Object.values(match)[0]}</p></div><i data-lucide="chevron-right" class="w-5 h-5 text-gray-600 group-hover:text-indigo-500"></i>`;
                         div.onclick = () => displayItemDetails(match);
                         matchList.appendChild(div);
                     });
