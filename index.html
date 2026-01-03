@@ -3,67 +3,60 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>K MART AL RAFFA - Item Master</title>
+  <title>K MART - Pro Master</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html5canvas.min.js"></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
     
     body { 
       -webkit-user-select: none; 
       user-select: none; 
       font-family: 'Inter', sans-serif;
-      transition: background-color 0.3s ease;
+      transition: all 0.3s ease;
     }
 
-    /* Light Mode Styles */
+    /* Standard Grey/Dark Theme */
     body { background-color: #f4f4f7; color: #1a1a1a; }
-    .custom-card { background: #ffffff; border: 1px solid #e5e7eb; shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-    .search-bar { background: #ffffff; border: 1px solid #d1d5db; }
-
-    /* Dark Mode Styles */
+    .glass-box { background: #ffffff; border: 1px solid #e2e8f0; }
+    
     @media (prefers-color-scheme: dark) {
       body { background-color: #000000; color: #ffffff; }
-      .custom-card { background: #111111; border: 1px solid #222222; }
-      .search-bar { background: #111111; border: 1px solid #333333; }
-      .text-muted { color: #a1a1aa; }
+      .glass-box { background: #111111; border: 1px solid #222222; }
+      .text-dim { color: #a1a1aa; }
     }
 
-    /* Modal Animation */
+    /* Modal Styling */
     #item-modal {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      visibility: hidden; opacity: 0; transform: translateY(20px);
+      transition: all 0.3s ease;
+      visibility: hidden; opacity: 0;
     }
     #item-modal.active {
-      visibility: visible; opacity: 1; transform: translateY(0);
+      visibility: visible; opacity: 1;
     }
 
-    .scan-laser {
-      width: 100%; height: 2px; background: #6366f1;
-      position: absolute; animation: scanAnim 2s infinite;
+    .share-canvas-area {
+      position: absolute; left: -9999px; top: -9999px;
     }
-    @keyframes scanAnim { 0% { top: 0; } 100% { top: 100%; } }
   </style>
 </head>
 
-<body class="min-h-screen pb-10">
+<body class="min-h-screen pb-20">
 
-  <div class="max-w-xl mx-auto p-5 space-y-6">
+  <div class="max-w-xl mx-auto p-4 space-y-6">
 
-    <header class="flex items-center justify-between py-4">
-      <div class="flex items-center gap-4">
-        <img src="icon-192.jpeg" id="app-logo" class="w-12 h-12 rounded-2xl border border-gray-200 dark:border-neutral-800 shadow-sm">
-        <div>
-          <h1 class="text-xl font-black tracking-tight uppercase">K Mart</h1>
-          <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Al Raffa • Item Master</p>
-        </div>
+    <header class="flex items-center justify-between py-2">
+      <div class="flex items-center gap-3">
+        <img src="icon-192.jpeg" class="w-10 h-10 rounded-xl border border-gray-200 dark:border-neutral-800">
+        <h1 class="text-lg font-black tracking-tighter uppercase">K Mart Pro</h1>
       </div>
-      <div id="status-badge" class="px-3 py-1 rounded-full bg-gray-100 dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 flex items-center gap-2">
+      <div id="status-pill" class="flex items-center gap-2 bg-white dark:bg-neutral-900 px-3 py-1 rounded-full border border-gray-100 dark:border-neutral-800">
         <div id="status-dot" class="w-2 h-2 rounded-full bg-orange-500"></div>
-        <span id="status-text" class="text-[9px] font-black uppercase text-gray-500">Syncing</span>
+        <span id="status-text" class="text-[9px] font-black uppercase text-gray-400 tracking-tighter">Syncing</span>
       </div>
     </header>
 
@@ -72,207 +65,216 @@
       <input id="gid-id" value="710656272">
     </div>
 
-    <section id="camera-box" class="hidden relative h-48 bg-black rounded-[2rem] overflow-hidden border border-gray-800">
-      <div id="reader"></div>
-      <div class="scan-laser"></div>
-      <button onclick="stopCamera()" class="absolute top-4 right-4 p-2 bg-white/10 backdrop-blur-md rounded-full text-white z-10">
-        <i data-lucide="x" class="w-5 h-5"></i>
-      </button>
-    </section>
-
-    <section class="search-bar p-2 rounded-[2.5rem] shadow-xl flex items-center">
-      <button onclick="startVoice()" class="p-4 text-gray-400 hover:text-gray-600 transition-all">
+    <section class="glass-box p-2 rounded-[2.5rem] shadow-xl flex items-center">
+      <button onclick="voiceSearch()" class="p-4 text-gray-400 active:scale-90 transition-all">
         <i data-lucide="mic" class="w-6 h-6"></i>
       </button>
-      <input id="main-input" type="text" placeholder="Search by Barcode or Name..." 
-        class="w-full bg-transparent py-5 px-2 text-lg font-bold outline-none placeholder:text-gray-300 dark:placeholder:text-neutral-700"
-        oninput="runSearch()">
-      <button onclick="startCamera()" class="bg-gray-900 dark:bg-neutral-100 text-white dark:text-black p-5 rounded-[2.1rem] active:scale-95 transition-all">
-        <i data-lucide="scan-line" class="w-6 h-6"></i>
+      <input id="search-input" type="text" placeholder="Scan or Search Product..." 
+        class="w-full bg-transparent py-5 px-1 text-lg font-bold outline-none placeholder:text-gray-300 dark:placeholder:text-neutral-800"
+        oninput="executeSearch()">
+      <button onclick="toggleScanner()" class="bg-gray-900 dark:bg-neutral-100 text-white dark:text-black p-5 rounded-[2.1rem] active:scale-95 transition-all">
+        <i data-lucide="scan-barcode" class="w-6 h-6"></i>
       </button>
     </section>
 
-    <main id="main-results" class="hidden space-y-5">
-      <div class="custom-card rounded-[2.5rem] p-8 shadow-sm">
-        <div class="flex justify-between items-start mb-6">
-          <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">Master Product</span>
-          <i data-lucide="info" class="w-5 h-5 text-gray-300"></i>
-        </div>
-        <h2 id="res-name" class="text-3xl font-black tracking-tighter leading-tight mb-6"></h2>
-        
-        <div class="grid grid-cols-2 gap-4">
-          <div onclick="showDetails(0)" class="bg-gray-50 dark:bg-neutral-800/50 p-5 rounded-3xl border border-gray-100 dark:border-neutral-800 cursor-pointer active:scale-95 transition-all">
-            <p class="text-[8px] font-black text-gray-400 uppercase mb-1">Stock ID</p>
-            <p id="res-barcode" class="font-mono font-bold text-sm"></p>
-          </div>
-          <div class="bg-gray-900 dark:bg-neutral-100 text-white dark:text-black p-5 rounded-3xl">
-            <p class="text-[8px] font-black opacity-60 uppercase mb-1">MRP Price</p>
-            <p id="res-mrp" class="text-xl font-black"></p>
-          </div>
-        </div>
-      </div>
-
-      <div class="space-y-3">
-        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest px-4">Packing Variations</p>
-        <div id="cf-list" class="space-y-3"></div>
-      </div>
-    </main>
-
-    <div id="not-found" class="hidden text-center py-20 opacity-40">
-      <i data-lucide="search-x" class="w-12 h-12 mx-auto mb-4"></i>
-      <p class="font-bold uppercase text-xs tracking-widest">Product Not Found</p>
+    <div id="scanner-wrap" class="hidden relative h-48 bg-black rounded-[2.5rem] overflow-hidden">
+        <div id="reader"></div>
     </div>
+
+    <main id="search-results" class="hidden space-y-4">
+      
+      <div id="main-item-card" class="glass-box rounded-[2.5rem] p-6 shadow-sm">
+        <div class="flex justify-between items-start mb-4">
+            <span class="text-[9px] font-black uppercase tracking-widest text-gray-400">Master Data (CF 1)</span>
+        </div>
+        <h2 id="disp-name" class="text-2xl font-black tracking-tighter leading-tight mb-6"></h2>
+        
+        <div class="grid grid-cols-2 gap-3">
+          <div onclick="openDetails(0)" class="bg-gray-50 dark:bg-neutral-800/50 p-4 rounded-3xl border border-gray-100 dark:border-neutral-800 cursor-pointer">
+            <p class="text-[8px] font-black text-gray-400 uppercase mb-1">Cost Price</p>
+            <p id="disp-cost" class="font-bold text-sm"></p>
+          </div>
+          <div class="bg-gray-900 dark:bg-neutral-100 text-white dark:text-black p-4 rounded-3xl">
+            <p class="text-[8px] font-black opacity-60 uppercase mb-1">MRP Price</p>
+            <p id="disp-mrp" class="text-xl font-black"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] px-4">Individual Pack Data</p>
+        <div id="variation-container" class="space-y-3"></div>
+      </div>
+
+    </main>
 
   </div>
 
-  <div id="item-modal" class="fixed inset-0 z-[100] flex items-end justify-center bg-black/40 backdrop-blur-sm p-4">
-    <div class="custom-card w-full max-w-md rounded-[2.5rem] overflow-hidden shadow-2xl">
-      <div class="p-6 border-b border-gray-100 dark:border-neutral-800 flex justify-between items-center">
-        <h3 id="modal-title" class="text-xl font-black truncate pr-4"></h3>
-        <button onclick="closeModal()" class="p-2 hover:bg-gray-100 dark:hover:bg-neutral-800 rounded-full transition-all">
-          <i data-lucide="x" class="w-6 h-6"></i>
-        </button>
+  <div id="item-modal" class="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 backdrop-blur-sm p-4">
+    <div id="modal-content" class="glass-box w-full max-w-md rounded-[2.5rem] overflow-hidden shadow-2xl">
+      <div id="capture-area" class="p-8 bg-white dark:bg-neutral-900">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-lg font-black uppercase tracking-tighter">K Mart Al Raffa</h1>
+            <span id="pop-cf" class="text-[10px] font-black px-3 py-1 bg-gray-100 dark:bg-neutral-800 rounded-full"></span>
+        </div>
+        <h3 id="pop-name" class="text-2xl font-black mb-6 leading-tight"></h3>
+        <div id="pop-details" class="space-y-2 border-t border-gray-50 dark:border-neutral-800 pt-4"></div>
       </div>
-      <div id="modal-body" class="p-6 max-h-[50vh] overflow-y-auto space-y-4"></div>
-      <div class="p-6 bg-gray-50 dark:bg-neutral-900/50">
-        <button id="share-btn" class="w-full py-5 bg-gray-900 dark:bg-neutral-100 text-white dark:text-black rounded-3xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg">
-          <i data-lucide="share" class="w-4 h-4"></i> Share Product Info
+
+      <div class="p-6 bg-gray-50 dark:bg-neutral-800/50 flex gap-3">
+        <button onclick="closeModal()" class="p-5 bg-white dark:bg-neutral-800 rounded-3xl text-gray-400">
+            <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+        <button onclick="shareAsImage()" class="flex-grow py-5 bg-gray-900 dark:bg-neutral-100 text-white dark:text-black rounded-3xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2">
+          <i data-lucide="image" class="w-4 h-4"></i> Share as Image
         </button>
       </div>
     </div>
   </div>
 
   <script>
-    let _INVENTORY = [];
+    let _DATA = [];
     let _HEADERS = [];
+    let _CURRENT_SET = [];
     let _SCANNER = null;
-    let _ACTIVE_ITEMS = [];
 
     lucide.createIcons();
 
-    // Data Fetching
-    async function syncData() {
+    async function initApp() {
       const sid = document.getElementById('sheet-id').value;
       const gid = document.getElementById('gid-id').value;
       try {
         const r = await fetch(`https://docs.google.com/spreadsheets/d/${sid}/export?format=csv&gid=${gid}`);
         const t = await r.text();
-        _INVENTORY = parseCSV(t);
-        _HEADERS = Object.keys(_INVENTORY[0]);
-        document.getElementById('status-text').innerText = "Online • " + _INVENTORY.length;
+        _DATA = parseCSV(t);
+        _HEADERS = Object.keys(_DATA[0]);
+        document.getElementById('status-text').innerText = "Online • " + _DATA.length;
         document.getElementById('status-dot').className = "w-2 h-2 rounded-full bg-green-500 shadow-lg";
       } catch (e) {
-        document.getElementById('status-text').innerText = "Sync Failed";
+        document.getElementById('status-text').innerText = "Offline";
       }
     }
 
-    function runSearch() {
-      const q = document.getElementById('main-input').value.trim().toLowerCase();
-      const resArea = document.getElementById('main-results');
-      const errArea = document.getElementById('not-found');
+    function executeSearch() {
+      const q = document.getElementById('search-input').value.trim().toLowerCase();
+      const results = document.getElementById('search-results');
+      
+      if (q.length < 2) { results.classList.add('hidden'); return; }
 
-      resArea.classList.add('hidden');
-      errArea.classList.add('hidden');
-
-      if (q.length < 2) return;
-
-      let hits = _INVENTORY.filter(i => String(Object.values(i)[0]).toLowerCase() === q);
+      // Find by barcode or name
+      let hits = _DATA.filter(i => String(Object.values(i)[0]).toLowerCase() === q);
       if (hits.length === 0) {
-        hits = _INVENTORY.filter(i => String(Object.values(i)[1]).toLowerCase().includes(q));
+        hits = _DATA.filter(i => String(Object.values(i)[1]).toLowerCase().includes(q));
       }
 
       if (hits.length > 0) {
         const mainName = Object.values(hits[0])[1];
-        _ACTIVE_ITEMS = _INVENTORY.filter(i => Object.values(i)[1] === mainName);
-        _ACTIVE_ITEMS.sort((a, b) => (a['CF'] || a['cf'] || 0) - (b['CF'] || b['cf'] || 0));
-        renderList();
-      } else {
-        errArea.classList.remove('hidden');
+        // Important: Getting each barcode's own data from the sheet
+        _CURRENT_SET = _DATA.filter(i => Object.values(i)[1] === mainName);
+        _CURRENT_SET.sort((a, b) => (a['CF'] || 0) - (b['CF'] || 0));
+        renderUI();
       }
     }
 
-    function renderList() {
-      document.getElementById('main-results').classList.remove('hidden');
-      const main = _ACTIVE_ITEMS.find(i => (i['CF'] || i['cf']) == 1) || _ACTIVE_ITEMS[0];
+    function renderUI() {
+      document.getElementById('search-results').classList.remove('hidden');
+      const main = _CURRENT_SET.find(i => i['CF'] == 1) || _CURRENT_SET[0];
       
-      document.getElementById('res-name').innerText = Object.values(main)[1];
-      document.getElementById('res-barcode').innerText = Object.values(main)[0];
-      document.getElementById('res-mrp').innerText = "AED " + (main['MRP'] || main['mrp'] || main['Price'] || '0.00');
+      document.getElementById('disp-name').innerText = Object.values(main)[1];
+      // Stock ID box now shows COST
+      document.getElementById('disp-cost').innerText = "AED " + (main['Cost'] || main['COST'] || '0.00');
+      document.getElementById('disp-mrp').innerText = "AED " + (main['MRP'] || main['mrp'] || '0.00');
 
-      const list = document.getElementById('cf-list');
-      list.innerHTML = "";
-      
-      _ACTIVE_ITEMS.forEach((v, idx) => {
+      const container = document.getElementById('variation-container');
+      container.innerHTML = "";
+
+      _CURRENT_SET.forEach((item, idx) => {
         const card = document.createElement('div');
-        card.className = "custom-card p-5 rounded-[2rem] flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all";
-        card.onclick = () => showDetails(idx);
+        card.className = "glass-box p-5 rounded-[2rem] flex items-center justify-between cursor-pointer active:scale-95 transition-all shadow-sm";
+        card.onclick = () => openDetails(idx);
+        
+        // Showing specific data for each individual barcode/CF card
         card.innerHTML = `
           <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-neutral-800 flex flex-col items-center justify-center font-black text-[10px]">
-              <span class="text-[7px] opacity-40">CF</span>${v['CF'] || v['cf'] || '1'}
+            <div class="w-10 h-10 rounded-2xl bg-gray-50 dark:bg-neutral-800 flex flex-col items-center justify-center">
+              <span class="text-[7px] font-black opacity-30">CF</span>
+              <span class="text-xs font-black">${item['CF'] || '1'}</span>
             </div>
             <div>
-              <p class="font-bold text-sm tracking-tight">${Object.values(v)[0]}</p>
-              <p class="text-[8px] font-black uppercase text-gray-400">Barcode ID</p>
+              <p class="font-bold text-sm">${Object.values(item)[0]}</p>
+              <p class="text-[8px] font-black uppercase text-gray-400">Barcode Specific Data</p>
             </div>
           </div>
           <div class="text-right">
-            <p class="font-black">AED ${v['MRP'] || v['mrp'] || v['Price'] || '0.00'}</p>
+            <p class="font-black text-base">AED ${item['MRP'] || '0.00'}</p>
+            <p class="text-[8px] font-bold text-green-500 uppercase">Stock: ${item['Stock'] || item['STOCK'] || '0'}</p>
           </div>
         `;
-        list.appendChild(card);
+        container.appendChild(card);
       });
       lucide.createIcons();
     }
 
-    function showDetails(idx) {
-      const item = _ACTIVE_ITEMS[idx];
-      const modal = document.getElementById('item-modal');
-      const body = document.getElementById('modal-body');
+    function openDetails(idx) {
+      const item = _CURRENT_SET[idx];
+      document.getElementById('pop-name').innerText = Object.values(item)[1];
+      document.getElementById('pop-cf').innerText = "CF: " + (item['CF'] || '1');
       
-      document.getElementById('modal-title').innerText = Object.values(item)[1];
-      body.innerHTML = "";
-      
+      const details = document.getElementById('pop-details');
+      details.innerHTML = "";
       _HEADERS.forEach(h => {
-        body.innerHTML += `
+        details.innerHTML += `
           <div class="flex justify-between items-center py-2 border-b border-gray-50 dark:border-neutral-800/50">
             <span class="text-[9px] font-black uppercase text-gray-400 tracking-widest">${h}</span>
             <span class="text-xs font-bold">${item[h] || '-'}</span>
           </div>
         `;
       });
-
-      document.getElementById('share-btn').onclick = () => shareData(item);
-      modal.classList.add('active');
+      document.getElementById('item-modal').classList.add('active');
     }
 
     function closeModal() { document.getElementById('item-modal').classList.remove('active'); }
 
-    function shareData(item) {
-      const text = `🛒 *K MART AL RAFFA*\n\n*Product:* ${Object.values(item)[1]}\n*Barcode:* ${Object.values(item)[0]}\n*MRP:* AED ${item['MRP'] || '0.00'}\n*Packing:* ${item['CF'] || '1'}\n\n_Check at K-Mart Master_`;
-      if (navigator.share) navigator.share({ text: text });
-      else window.open(`https://wa.me/?text=${encodeURIComponent(text)}`);
+    // THE IMAGE SHARING FUNCTION
+    async function shareAsImage() {
+        const area = document.getElementById('capture-area');
+        const canvas = await html2canvas(area, {
+            backgroundColor: null,
+            scale: 2
+        });
+        
+        canvas.toBlob(async (blob) => {
+            const file = new File([blob], 'product-info.png', { type: 'image/png' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                    files: [file],
+                    title: 'Product Details'
+                });
+            } else {
+                alert("Image sharing not supported on this browser.");
+            }
+        });
     }
 
-    function startCamera() {
-      document.getElementById('camera-box').classList.remove('hidden');
-      _SCANNER = new Html5Qrcode("reader");
-      _SCANNER.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, (txt) => {
-        document.getElementById('main-input').value = txt;
-        stopCamera();
-        runSearch();
-      });
+    function toggleScanner() {
+        const wrap = document.getElementById('scanner-wrap');
+        if (!wrap.classList.contains('hidden')) {
+            _SCANNER.stop().then(() => { _SCANNER.clear(); wrap.classList.add('hidden'); });
+        } else {
+            wrap.classList.remove('hidden');
+            _SCANNER = new Html5Qrcode("reader");
+            _SCANNER.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, (txt) => {
+                document.getElementById('search-input').value = txt;
+                _SCANNER.stop().then(() => { _SCANNER.clear(); wrap.classList.add('hidden'); executeSearch(); });
+            });
+        }
     }
 
-    function stopCamera() {
-      if (_SCANNER) _SCANNER.stop().then(() => { _SCANNER.clear(); document.getElementById('camera-box').classList.add('hidden'); });
-    }
-
-    function startVoice() {
+    function voiceSearch() {
       const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!Rec) return;
       const r = new Rec();
-      r.onresult = (e) => { document.getElementById('main-input').value = e.results[0][0].transcript; runSearch(); };
+      r.onresult = (e) => { document.getElementById('search-input').value = e.results[0][0].transcript; executeSearch(); };
       r.start();
     }
 
@@ -287,7 +289,7 @@
       });
     }
 
-    syncData();
+    initApp();
   </script>
 </body>
 </html>
