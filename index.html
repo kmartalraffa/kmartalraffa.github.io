@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>K MART PRO MASTER</title>
+  <title>K MART PRO MASTER v5</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -17,43 +17,43 @@
       font-family: 'Inter', sans-serif; 
       -webkit-tap-highlight-color: transparent;
       user-select: none;
+      transition: background-color 0.3s ease;
     }
 
-    /* Light Mode (Forced visibility) */
+    /* Light Mode Styles */
     @media (prefers-color-scheme: light) {
-      body { background-color: #f1f5f9; color: #0f172a; }
-      .glass-card { background: #ffffff; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+      body { background-color: #f8fafc; color: #0f172a; }
+      .glass-card { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px -2px rgba(0,0,0,0.05); }
+      .search-box { background: #ffffff; border: 2px solid #cbd5e1; }
       .text-dim { color: #64748b; }
-      .search-box { background: #ffffff; border: 2px solid #94a3b8; }
-      .modal-content { background: #ffffff; }
+      .modal-bg { background: #ffffff; }
     }
 
-    /* Dark Mode */
+    /* Dark Mode Styles */
     @media (prefers-color-scheme: dark) {
-      body { background-color: #000000; color: #f8fafc; }
+      body { background-color: #000000; color: #f1f5f9; }
       .glass-card { background: #111111; border: 1px solid #1e293b; }
-      .text-dim { color: #94a3b8; }
       .search-box { background: #111111; border: 1px solid #334155; }
-      .modal-content { background: #0a0a0a; }
+      .text-dim { color: #94a3b8; }
+      .modal-bg { background: #0a0a0a; }
     }
 
     #item-modal {
       display: none; position: fixed; inset: 0; z-index: 1000;
-      background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+      background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
       align-items: flex-end; justify-content: center;
     }
-    #item-modal.active { display: flex; }
-
-    .no-scrollbar::-webkit-scrollbar { display: none; }
+    #item-modal.active { display: flex; animation: slideUp 0.3s ease-out; }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
   </style>
 </head>
-<body class="min-h-screen pb-20">
+<body class="min-h-screen pb-24">
 
   <div class="max-w-xl mx-auto px-4 py-6 space-y-6">
     <header class="flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="p-1 bg-white rounded-xl border-2 border-slate-200">
-          <img src="icon-192.jpeg" class="w-10 h-10 rounded-lg object-cover">
+          <img src="icon-192.jpeg" class="w-10 h-10 rounded-lg object-cover" onerror="this.src='https://via.placeholder.com/40'">
         </div>
         <div>
           <h1 class="text-xl font-black tracking-tighter uppercase leading-none">K Mart</h1>
@@ -66,59 +66,72 @@
       </div>
     </header>
 
-    <div class="search-box p-2 flex items-center rounded-[2rem] shadow-2xl">
-      <button onclick="engine.startVoice()" class="p-4 text-slate-400 hover:text-blue-500"><i data-lucide="mic"></i></button>
-      <input id="main-input" type="text" placeholder="Scan Barcode or Name..." 
-        class="w-full bg-transparent py-4 px-2 text-lg font-bold outline-none placeholder:text-slate-400"
+    <div class="search-box p-2 flex items-center rounded-[2.2rem] shadow-2xl transition-all focus-within:ring-2 focus-within:ring-blue-500/20">
+      <button onclick="engine.startVoice()" class="p-4 text-slate-400 hover:text-blue-500 transition-colors">
+        <i data-lucide="mic"></i>
+      </button>
+      <input id="main-input" type="text" placeholder="Search Barcode or Item..." 
+        class="w-full bg-transparent py-4 px-2 text-lg font-bold outline-none placeholder:text-slate-400 dark:placeholder:text-slate-700"
         oninput="engine.debounce()">
-      <button onclick="ui.toggleScanner()" class="bg-slate-900 dark:bg-slate-100 text-white dark:text-black p-4 rounded-2xl shadow-xl active:scale-90 transition-all">
+      <button onclick="ui.toggleScanner()" class="bg-slate-900 dark:bg-white text-white dark:text-black p-4 rounded-2xl shadow-xl active:scale-90 transition-all">
         <i data-lucide="camera"></i>
       </button>
     </div>
 
-    <div id="scanner-wrap" class="hidden relative h-48 bg-black rounded-[2rem] overflow-hidden border-2 border-slate-800">
+    <div id="scanner-wrap" class="hidden relative h-52 bg-black rounded-[2.5rem] overflow-hidden border-2 border-slate-800 shadow-inner">
       <div id="reader" class="w-full"></div>
-      <button onclick="ui.stopScanner()" class="absolute top-3 right-3 bg-red-500 text-white p-2 rounded-full z-10"><i data-lucide="x" class="w-4 h-4"></i></button>
+      <button onclick="ui.stopScanner()" class="absolute top-4 right-4 bg-red-600 text-white p-2 rounded-full z-10 shadow-lg"><i data-lucide="x" class="w-4 h-4"></i></button>
     </div>
 
     <main id="results-container" class="hidden space-y-6">
-      <div class="glass-card p-6 rounded-[2.5rem]">
-        <h2 id="res-name" class="text-2xl font-black tracking-tight leading-tight mb-6"></h2>
-        <div class="grid grid-cols-2 gap-3">
-          <div class="bg-slate-100/50 dark:bg-slate-800/40 p-4 rounded-2xl border border-slate-200/50 dark:border-slate-700/50">
-            <p class="text-[9px] font-black text-dim uppercase mb-1">Base Cost (CF1)</p>
-            <p id="res-cost" class="font-bold text-lg text-blue-600 dark:text-blue-400"></p>
+      <div class="glass-card p-8 rounded-[2.5rem]">
+        <h2 id="res-name" class="text-2xl font-black tracking-tight leading-tight mb-8"></h2>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-slate-50 dark:bg-slate-800/40 p-5 rounded-3xl border border-slate-100 dark:border-slate-700">
+            <p class="text-[9px] font-black text-dim uppercase mb-1">Item Cost (CF1)</p>
+            <p id="res-cost" class="font-bold text-lg text-blue-600 dark:text-blue-400 font-mono"></p>
           </div>
-          <div class="bg-slate-900 dark:bg-white text-white dark:text-black p-4 rounded-2xl">
-            <p class="text-[9px] font-black opacity-50 uppercase mb-1">Base MRP</p>
-            <p id="res-mrp" class="text-xl font-black"></p>
+          <div class="bg-slate-900 dark:bg-white text-white dark:text-black p-5 rounded-3xl shadow-xl">
+            <p class="text-[9px] font-black opacity-50 uppercase mb-1">Selling MRP</p>
+            <p id="res-mrp" class="text-xl font-black font-mono"></p>
           </div>
         </div>
       </div>
 
       <div class="space-y-3">
-        <p class="text-[10px] font-black text-dim uppercase tracking-[0.3em] px-4">Calculated Stock per Packing</p>
+        <div class="flex justify-between items-center px-4">
+          <p class="text-[10px] font-black text-dim uppercase tracking-[0.3em]">Packing Variations</p>
+          <span id="match-count" class="text-[9px] font-bold bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded-full"></span>
+        </div>
         <div id="variant-list" class="space-y-3"></div>
       </div>
     </main>
 
-    <div id="empty-state" class="hidden text-center py-20 opacity-20"><i data-lucide="search-x" class="w-12 h-12 mx-auto"></i></div>
+    <div id="empty-state" class="hidden text-center py-20 opacity-30">
+      <i data-lucide="package-search" class="w-16 h-16 mx-auto mb-4"></i>
+      <p class="font-black uppercase text-xs tracking-widest">No Items Match</p>
+    </div>
   </div>
 
   <div id="item-modal">
-    <div class="modal-content w-full max-w-lg rounded-t-[3rem] p-4 shadow-2xl">
-      <div id="capture-zone" class="p-8 bg-white dark:bg-neutral-900 rounded-[2rem]">
+    <div class="modal-bg w-full max-w-lg rounded-t-[3.5rem] p-4 shadow-2xl overflow-hidden">
+      <div id="capture-zone" class="p-8 modal-bg rounded-[2.5rem]">
         <div class="flex justify-between items-start mb-6">
-          <h4 class="text-blue-600 font-black text-[10px] tracking-widest uppercase">K MART AL RAFFA</h4>
-          <span id="pop-cf" class="text-[10px] font-black bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg"></span>
+          <div class="flex flex-col">
+            <h4 class="text-blue-600 font-black text-[10px] tracking-[0.2em] uppercase">K MART AL RAFFA</h4>
+            <span id="pop-barcode" class="text-[10px] font-mono font-bold text-dim mt-1"></span>
+          </div>
+          <span id="pop-cf" class="text-[10px] font-black bg-blue-500/10 text-blue-600 px-4 py-1.5 rounded-full border border-blue-500/20"></span>
         </div>
-        <h3 id="pop-name" class="text-2xl font-black mb-6 leading-tight dark:text-white text-slate-900"></h3>
-        <div id="pop-grid" class="space-y-2 border-t pt-4 border-slate-100 dark:border-slate-800"></div>
+        <h3 id="pop-name" class="text-2xl font-black mb-8 leading-tight"></h3>
+        <div id="pop-grid" class="space-y-3 border-t pt-6 border-slate-100 dark:border-slate-800"></div>
       </div>
-      <div class="p-6 flex gap-3">
-        <button onclick="ui.closeModal()" class="p-4 glass-card rounded-2xl"><i data-lucide="x"></i></button>
-        <button onclick="engine.shareImage()" id="share-btn" class="flex-grow py-4 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2">
-          <i data-lucide="share-2" class="w-4 h-4"></i> Share Card
+      <div class="p-6 flex gap-4">
+        <button onclick="ui.closeModal()" class="p-5 glass-card rounded-[2rem] active:scale-90 transition-transform">
+          <i data-lucide="arrow-left" class="w-6 h-6"></i>
+        </button>
+        <button onclick="engine.shareImage()" id="share-btn" class="flex-grow py-5 bg-black dark:bg-white text-white dark:text-black rounded-[2rem] font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 active:scale-95 transition-all">
+          <i data-lucide="share-2" class="w-5 h-5"></i> Share Card Image
         </button>
       </div>
     </div>
@@ -126,6 +139,12 @@
 
   <script>
     let _DB = [], _ACTIVE_SET = [], _SCANNER = null, _TIMER = null;
+
+    // Initialization
+    window.onload = () => {
+      sync();
+      lucide.createIcons();
+    };
 
     async function sync() {
       const sid = "1eEFtb7wxOOLw-TFTf_NvSFq1VQy1qYlMoVmiZkFgUys";
@@ -135,8 +154,11 @@
         const t = await r.text();
         _DB = parseCSV(t);
         document.getElementById('sync-text').innerText = `Online • ${_DB.length}`;
-        document.getElementById('sync-dot').classList.replace('bg-orange-500', 'bg-green-500');
-      } catch (e) { document.getElementById('sync-text').innerText = "Offline"; }
+        document.getElementById('sync-dot').className = "w-2 h-2 rounded-full bg-green-500 shadow-lg shadow-green-500/50";
+      } catch (e) {
+        document.getElementById('sync-text').innerText = "Offline Mode";
+        document.getElementById('sync-dot').className = "w-2 h-2 rounded-full bg-red-500";
+      }
     }
 
     const engine = {
@@ -144,52 +166,69 @@
       
       search: () => {
         const q = document.getElementById('main-input').value.trim().toLowerCase();
-        if (q.length < 2) return;
-        
-        let matches = _DB.filter(i => String(i.ItemBarCode).toLowerCase() === q);
-        if (matches.length === 0) matches = _DB.filter(i => String(i.ItemName).toLowerCase().includes(q));
+        const resCon = document.getElementById('results-container');
+        const emp = document.getElementById('empty-state');
 
-        if (matches.length > 0) {
-          _ACTIVE_SET = _DB.filter(i => i.ItemName === matches[0].ItemName);
-          _ACTIVE_SET.sort((a,b) => (a.CF || 1) - (b.CF || 1));
+        if (q.length < 2) { resCon.classList.add('hidden'); emp.classList.add('hidden'); return; }
+
+        let results = [];
+        
+        // 1. Barcode Exact Match
+        results = _DB.filter(i => String(i.ItemBarCode).toLowerCase() === q);
+
+        // 2. Tokenized Name Search (Old Functionality)
+        if (results.length === 0) {
+          const queryTokens = q.split(/\s+/).filter(t => t);
+          results = _DB.filter(row => {
+            const itemName = String(row.ItemName).toLowerCase();
+            return queryTokens.every(token => itemName.includes(token));
+          });
+        }
+
+        if (results.length > 0) {
+          const name = results[0].ItemName;
+          _ACTIVE_SET = _DB.filter(i => i.ItemName === name);
+          _ACTIVE_SET.sort((a,b) => (parseFloat(a.CF) || 1) - (parseFloat(b.CF) || 1));
           engine.render();
-          document.getElementById('results-container').classList.remove('hidden');
+          resCon.classList.remove('hidden'); emp.classList.add('hidden');
+        } else {
+          resCon.classList.add('hidden'); emp.classList.remove('hidden');
         }
       },
 
       render: () => {
-        const cf1Item = _ACTIVE_SET.find(i => i.CF == 1) || _ACTIVE_SET[0];
-        const baseStock = parseFloat(cf1Item.LiveStock) || 0;
+        const cf1 = _ACTIVE_SET.find(i => i.CF == 1) || _ACTIVE_SET[0];
+        const baseStock = parseFloat(cf1.LiveStock) || 0;
 
-        document.getElementById('res-name').innerText = cf1Item.ItemName;
-        document.getElementById('res-cost').innerText = `AED ${cf1Item.CostPrice}`;
-        document.getElementById('res-mrp').innerText = `AED ${cf1Item.MRP}`;
+        document.getElementById('res-name').innerText = cf1.ItemName;
+        document.getElementById('res-cost').innerText = `AED ${cf1.CostPrice}`;
+        document.getElementById('res-mrp').innerText = `AED ${cf1.MRP}`;
+        document.getElementById('match-count').innerText = `${_ACTIVE_SET.length} Packs`;
 
         const list = document.getElementById('variant-list');
         list.innerHTML = "";
 
         _ACTIVE_SET.forEach((item, idx) => {
-          const currentCF = parseFloat(item.CF) || 1;
-          // Stock Logic: Base Stock / Current CF
-          const calculatedStock = Math.floor(baseStock / currentCF);
+          const cf = parseFloat(item.CF) || 1;
+          const calcStock = Math.floor(baseStock / cf);
           
           const card = document.createElement('div');
-          card.className = "glass-card p-5 rounded-[1.5rem] flex items-center justify-between cursor-pointer active:scale-95 transition-all";
-          card.onclick = () => ui.openModal(idx, calculatedStock);
+          card.className = "glass-card p-5 rounded-[1.8rem] flex items-center justify-between cursor-pointer active:scale-95 transition-all";
+          card.onclick = () => ui.openModal(idx, calcStock);
           card.innerHTML = `
             <div class="flex items-center gap-4">
-              <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex flex-col items-center justify-center border dark:border-slate-700">
-                <span class="text-[7px] font-black opacity-40 uppercase">CF</span>
-                <span class="text-xs font-black text-blue-500">${currentCF}</span>
+              <div class="w-11 h-11 rounded-2xl bg-slate-50 dark:bg-slate-800 flex flex-col items-center justify-center border border-slate-100 dark:border-slate-700">
+                <span class="text-[7px] font-black text-dim uppercase">CF</span>
+                <span class="text-xs font-black text-blue-500">${cf}</span>
               </div>
               <div>
-                <p class="font-mono font-bold text-[10px] text-dim">${item.ItemBarCode}</p>
-                <p class="text-[9px] font-black uppercase text-blue-500/60 mt-0.5">Price: AED ${item.MRP}</p>
+                <p class="font-mono font-bold text-[10px] text-dim tracking-tighter">${item.ItemBarCode}</p>
+                <p class="text-[9px] font-black uppercase text-blue-500/70 mt-0.5">Price: AED ${item.MRP}</p>
               </div>
             </div>
             <div class="text-right">
-              <p class="text-lg font-black leading-none mb-1">${calculatedStock}</p>
-              <p class="text-[8px] font-bold text-dim uppercase">Live Units</p>
+              <p class="text-xl font-black leading-none mb-1 font-mono">${calcStock}</p>
+              <p class="text-[8px] font-bold text-dim uppercase tracking-widest">Live Units</p>
             </div>
           `;
           list.appendChild(card);
@@ -199,22 +238,44 @@
 
       shareImage: async () => {
         const btn = document.getElementById('share-btn');
-        btn.innerText = "Processing...";
-        const area = document.getElementById('capture-zone');
-        const canvas = await html2canvas(area, { scale: 2, useCORS: true });
-        canvas.toBlob(blob => {
-          const file = new File([blob], 'kmart.png', { type: 'image/png' });
-          if (navigator.share) navigator.share({ files: [file] });
-          btn.innerHTML = `<i data-lucide="share-2" class="w-4 h-4"></i> Share Card`;
-          lucide.createIcons();
-        });
+        const orig = btn.innerHTML;
+        btn.innerHTML = "Creating Image...";
+        
+        try {
+          const area = document.getElementById('capture-zone');
+          const canvas = await html2canvas(area, { 
+            scale: 3, 
+            backgroundColor: null,
+            useCORS: true,
+            logging: false
+          });
+          
+          canvas.toBlob(async blob => {
+            const file = new File([blob], 'kmart_item.png', { type: 'image/png' });
+            if (navigator.share) {
+              await navigator.share({ files: [file], title: 'Product Details' });
+            } else {
+              const link = document.createElement('a');
+              link.download = 'kmart_item.png';
+              link.href = URL.createObjectURL(blob);
+              link.click();
+            }
+            btn.innerHTML = orig;
+          });
+        } catch (e) {
+          btn.innerHTML = "Error!";
+          setTimeout(() => btn.innerHTML = orig, 2000);
+        }
       },
 
       startVoice: () => {
         const S = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!S) return;
+        if (!S) return alert("Voice search not supported on this device.");
         const r = new S();
-        r.onresult = (e) => { document.getElementById('main-input').value = e.results[0][0].transcript; engine.search(); };
+        r.onresult = (e) => { 
+          document.getElementById('main-input').value = e.results[0][0].transcript; 
+          engine.search(); 
+        };
         r.start();
       }
     };
@@ -222,27 +283,47 @@
     const ui = {
       toggleScanner: () => {
         const w = document.getElementById('scanner-wrap');
-        w.classList.toggle('hidden');
-        if (!w.classList.contains('hidden')) {
+        if (w.classList.contains('hidden')) {
+          w.classList.remove('hidden');
           _SCANNER = new Html5Qrcode("reader");
-          _SCANNER.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, (t) => {
-            document.getElementById('main-input').value = t; ui.stopScanner(); engine.search();
+          _SCANNER.start({ facingMode: "environment" }, { fps: 25, qrbox: 250 }, (t) => {
+            document.getElementById('main-input').value = t; 
+            ui.stopScanner(); 
+            engine.search();
           });
         } else ui.stopScanner();
       },
-      stopScanner: () => { if(_SCANNER) _SCANNER.stop().then(() => { _SCANNER.clear(); document.getElementById('scanner-wrap').classList.add('hidden'); }); },
+      stopScanner: () => {
+        if (_SCANNER) {
+          _SCANNER.stop().then(() => {
+            _SCANNER.clear();
+            document.getElementById('scanner-wrap').classList.add('hidden');
+          });
+        }
+      },
       openModal: (idx, calcStock) => {
         const item = _ACTIVE_SET[idx];
         document.getElementById('pop-name').innerText = item.ItemName;
+        document.getElementById('pop-barcode').innerText = `ID: ${item.ItemBarCode}`;
         document.getElementById('pop-cf').innerText = `PACKING CF: ${item.CF}`;
+        
         const grid = document.getElementById('pop-grid');
-        grid.innerHTML = `
-          <div class="flex justify-between py-2 border-b border-slate-50 dark:border-slate-800 text-[10px] font-bold uppercase"><span class="text-dim">Barcode</span><span class="dark:text-white">${item.ItemBarCode}</span></div>
-          <div class="flex justify-between py-2 border-b border-slate-50 dark:border-slate-800 text-[10px] font-bold uppercase"><span class="text-dim">Cost Price</span><span class="text-blue-500">${item.CostPrice}</span></div>
-          <div class="flex justify-between py-2 border-b border-slate-50 dark:border-slate-800 text-[10px] font-bold uppercase"><span class="text-dim">MRP Rate</span><span class="dark:text-white">${item.MRP}</span></div>
-          <div class="flex justify-between py-2 border-b border-slate-50 dark:border-slate-800 text-[10px] font-bold uppercase"><span class="text-dim">Live Stock</span><span class="text-green-500">${calcStock}</span></div>
-        `;
+        const rows = [
+          { l: 'Cost Price', v: item.CostPrice, c: 'text-blue-500' },
+          { l: 'MRP Rate', v: item.MRP, c: 'font-bold' },
+          { l: 'Live Stock', v: calcStock, c: 'text-green-500' },
+          { l: 'Group', v: item.GroupName, c: '' }
+        ];
+
+        grid.innerHTML = rows.map(r => `
+          <div class="flex justify-between items-center py-2.5 border-b border-slate-50 dark:border-slate-800/50">
+            <span class="text-[10px] font-black text-dim uppercase tracking-widest">${r.l}</span>
+            <span class="text-xs font-black uppercase ${r.c}">${r.v || '-'}</span>
+          </div>
+        `).join('');
+
         document.getElementById('item-modal').classList.add('active');
+        if (navigator.vibrate) navigator.vibrate(50);
       },
       closeModal: () => document.getElementById('item-modal').classList.remove('active')
     };
@@ -256,9 +337,6 @@
         return o;
       });
     }
-
-    sync();
-    lucide.createIcons();
   </script>
 </body>
 </html>
