@@ -211,26 +211,27 @@ function renderSingleGroup(groupRows) {
   subtitleEl.innerText = `${groupRows.length} variants • CF-based stock`;
 
   detailsEl.innerHTML = `
-    <div class="py-4 flex justify-between">
-      <span class="text-[10px] font-black text-slate-400 uppercase">Barcode</span>
-      <span class="text-xs font-mono">${mainRow["ItemBarCode"]}</span>
-    </div>
+  <div class="py-4 flex justify-between">
+    <span class="text-[10px] font-black text-slate-400 dark:text-neutral-500 uppercase">Barcode</span>
+    <span class="text-xs font-mono text-slate-600 dark:text-slate-300">${mainRow["ItemBarCode"]}</span>
+  </div>
 
-    <div class="py-4 flex justify-between">
-      <span class="text-[10px] font-black text-slate-400 uppercase">Cost</span>
-      <span class="text-xl font-black">${mainRow["CostPrice"]}</span>
-    </div>
+  <div class="py-4 flex justify-between">
+    <span class="text-[10px] font-black text-slate-400 dark:text-neutral-500 uppercase">Cost</span>
+    <span class="text-xl font-black text-slate-900 dark:text-slate-50">${mainRow["CostPrice"]}</span>
+  </div>
 
-    <div class="py-4 flex justify-between">
-      <span class="text-[10px] font-black text-slate-400 uppercase">MRP</span>
-      <span class="text-xl font-black">${mainRow["MRP"]}</span>
-    </div>
+  <div class="py-4 flex justify-between">
+    <span class="text-[10px] font-black text-slate-400 dark:text-neutral-500 uppercase">MRP</span>
+    <span class="text-xl font-black text-slate-900 dark:text-slate-50">${mainRow["MRP"]}</span>
+  </div>
 
-    <div class="py-4 flex justify-between">
-      <span class="text-[10px] font-black text-slate-400 uppercase">Main Stock</span>
-      <span class="text-base font-bold">${mainStock}</span>
-    </div>
-  `;
+  <div class="py-4 flex justify-between">
+    <span class="text-[10px] font-black text-slate-400 dark:text-neutral-500 uppercase">Main Stock</span>
+    <span class="text-base font-bold text-slate-900 dark:text-slate-50">${mainStock}</span>
+  </div>
+`;
+
 
   openPopupBtn.classList.remove("hidden");
   openPopupBtn.onclick = () => openItemModal(groupRows);
