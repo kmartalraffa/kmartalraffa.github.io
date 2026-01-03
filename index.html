@@ -16,436 +16,603 @@
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
     
+    :root {
+      --primary-blue: #2563eb;
+      --glass-bg: rgba(255, 255, 255, 0.85);
+      --glass-dark: rgba(23, 23, 23, 0.85);
+    }
+
     body { 
       -webkit-user-select: none; 
       user-select: none; 
       -webkit-tap-highlight-color: transparent; 
       font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
     }
 
-    /* Glassmorphism Design */
-    .glass-effect {
-      background: rgba(255, 255, 255, 0.8);
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
-      border: 1px solid rgba(255, 255, 255, 0.4);
+    /* Modern Glassmorphism Container */
+    .glass-box {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     @media (prefers-color-scheme: dark) {
-      .glass-effect {
-        background: rgba(18, 18, 18, 0.8);
+      .glass-box {
+        background: var(--glass-dark);
         border: 1px solid rgba(255, 255, 255, 0.05);
       }
     }
 
-    /* Animated Scanner */
+    /* Custom Input States */
+    .search-focus:focus-within {
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+      border-color: var(--primary-blue);
+    }
+
+    /* Scanner Viewport with Overlay */
     #reader-container {
-      position: relative; width: 100%; height: 240px; overflow: hidden;
-      border-radius: 2.5rem; background: #000;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      position: relative; 
+      width: 100%; 
+      height: 250px; 
+      overflow: hidden;
+      border-radius: 3rem; 
+      background: #000;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.6);
     }
     
-    #reader video { width: 100% !important; height: 240px !important; object-fit: cover !important; }
-
-    .scan-line {
-      width: 100%; height: 4px; background: #3b82f6;
-      position: absolute; top: 0; box-shadow: 0 0 20px #3b82f6;
-      animation: scanMove 2.5s infinite ease-in-out;
-      z-index: 10;
+    #reader video { 
+      width: 100% !important; 
+      height: 250px !important; 
+      object-fit: cover !important; 
     }
 
-    @keyframes scanMove { 0%, 100% { top: 5%; } 50% { top: 90%; } }
+    /* Floating Scan Animation */
+    .scan-guide {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 70%; height: 120px;
+      border: 2px solid rgba(59, 130, 246, 0.5);
+      border-radius: 20px;
+      box-shadow: 0 0 0 1000px rgba(0,0,0,0.5);
+      z-index: 5;
+    }
 
-    .fade-in { animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .laser {
+      width: 100%; 
+      height: 4px; 
+      background: linear-gradient(to bottom, transparent, #3b82f6, transparent);
+      position: absolute; 
+      top: 0;
+      box-shadow: 0 0 20px #3b82f6;
+      animation: laserMove 2.5s infinite linear;
+    }
 
-    .pulse-blue { animation: pulse 2s infinite; }
-    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
+    @keyframes laserMove { 
+      0%, 100% { top: 0%; opacity: 0.5; } 
+      50% { top: 100%; opacity: 1; } 
+    }
+
+    /* Smooth Animations */
+    .item-card-animate {
+      animation: cardEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes cardEnter {
+      from { opacity: 0; transform: translateY(30px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Skeleton Loading Effect */
+    .shimmer {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    /* History Pills */
+    .history-pill {
+      transition: all 0.2s ease;
+      background: white;
+    }
+    @media (prefers-color-scheme: dark) { .history-pill { background: #171717; } }
+    .history-pill:active { transform: scale(0.9); }
   </style>
 </head>
 
-<body class="bg-slate-50 dark:bg-black min-h-screen pb-20 transition-colors duration-500">
+<body class="bg-slate-50 dark:bg-black min-h-screen transition-colors duration-500">
 
-  <div class="max-w-xl mx-auto p-4 space-y-6">
+  <div class="max-w-2xl mx-auto px-4 pt-6 pb-24 space-y-7">
 
-    <header class="flex items-center justify-between bg-white dark:bg-neutral-900/50 p-4 rounded-[2rem] shadow-sm border border-slate-100 dark:border-neutral-800">
-      <div class="flex items-center gap-3">
-        <img src="icon-192.jpeg" id="app-logo" class="w-12 h-12 rounded-2xl shadow-md border border-slate-100 dark:border-neutral-800" alt="Logo">
+    <nav class="flex items-center justify-between glass-box p-4 rounded-[2.5rem] shadow-sm">
+      <div class="flex items-center gap-4">
+        <div class="relative">
+          <img src="icon-192.jpeg" id="app-logo" class="w-14 h-14 rounded-2xl shadow-lg border-2 border-white dark:border-neutral-800" alt="K Mart">
+          <div class="absolute -top-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white dark:border-neutral-900 rounded-full"></div>
+        </div>
         <div>
-          <h1 class="text-xl font-black tracking-tighter dark:text-white uppercase">K Mart</h1>
-          <p class="text-[9px] font-bold text-blue-500 uppercase tracking-[0.2em]">Smart Master v2.0</p>
+          <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-none">K MART</h1>
+          <p class="text-[10px] font-extrabold text-blue-500 uppercase tracking-widest mt-1">Smart Item Master</p>
         </div>
       </div>
-      <div class="flex flex-col items-end">
-        <div id="status-pill" class="flex items-center gap-2 bg-slate-50 dark:bg-neutral-800 px-3 py-1 rounded-full border border-slate-100 dark:border-neutral-700">
-          <span id="status-dot" class="w-2 h-2 rounded-full bg-orange-500"></span>
-          <span id="status-text" class="text-[10px] font-bold text-slate-500 uppercase">Syncing</span>
+      
+      <div class="text-right">
+        <div id="status-badge" class="flex items-center gap-2 bg-slate-100 dark:bg-neutral-800 px-3 py-1.5 rounded-full transition-all">
+          <span id="status-dot" class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+          <span id="status-text" class="text-[9px] font-black text-slate-500 dark:text-neutral-400 uppercase tracking-tighter">Connecting</span>
         </div>
-        <span id="last-update-time" class="text-[9px] font-mono text-slate-400 mt-1"></span>
+        <p id="sync-time" class="text-[8px] font-bold text-slate-400 mt-1 font-mono uppercase"></p>
       </div>
-    </header>
+    </nav>
 
-    <div id="settings-panel" class="hidden">
-      <input id="sheet-id" type="text" value="1eEFtb7wxOOLw-TFTf_NvSFq1VQy1qYlMoVmiZkFgUys" />
-      <input id="gid-id" type="text" value="710656272" />
+    <div id="app-config" class="hidden">
+      <input id="cfg-sheet-id" type="text" value="1eEFtb7wxOOLw-TFTf_NvSFq1VQy1qYlMoVmiZkFgUys" />
+      <input id="cfg-gid-id" type="text" value="710656272" />
     </div>
 
-    <section id="reader-container" class="hidden fade-in">
-      <div id="reader"></div>
-      <div class="absolute inset-0 border-[60px] border-black/40 pointer-events-none"></div>
-      <div class="scan-line"></div>
-      <button onclick="stopCamera()" class="absolute top-6 right-6 bg-white/10 backdrop-blur-xl p-3 rounded-full text-white z-20 hover:bg-red-500 transition-all">
-        <i data-lucide="x" class="w-6 h-6"></i>
-      </button>
+    <section id="camera-section" class="hidden item-card-animate">
+      <div id="reader-container">
+        <div id="reader"></div>
+        <div class="scan-guide"><div class="laser"></div></div>
+        <button onclick="uiAction.stopScanner()" class="absolute top-6 right-6 bg-white/20 backdrop-blur-2xl p-3.5 rounded-full text-white z-20 hover:bg-red-500 transition-all">
+          <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+      </div>
     </section>
 
-    <section class="glass-effect p-2 rounded-[2.8rem] shadow-2xl shadow-blue-500/5 dark:shadow-none transition-all">
+    <section class="glass-box p-3 rounded-[3rem] shadow-2xl shadow-blue-500/10 dark:shadow-none transition-all search-focus">
       <div class="relative flex items-center">
-        <button id="voice-btn" onclick="startVoiceSearch()" class="ml-2 p-4 text-slate-400 hover:text-blue-500 transition-colors">
+        <button id="voice-trigger" onclick="searchCore.initVoice()" class="ml-2 p-4 text-slate-400 hover:text-blue-500 active:scale-90 transition-all">
           <i data-lucide="mic" class="w-7 h-7"></i>
         </button>
         
-        <input id="smart-search-input" type="text" placeholder="Scan barcode or type item name..."
-          class="w-full py-6 px-4 bg-transparent text-lg font-bold dark:text-white placeholder:text-slate-300 dark:placeholder:neutral-700 focus:outline-none"
-          oninput="handleSearch()" />
+        <input id="master-search-input" type="text" 
+          placeholder="Barcode or Product Name..."
+          class="w-full py-6 px-4 bg-transparent text-xl font-bold dark:text-white placeholder:text-slate-300 dark:placeholder:neutral-800 focus:outline-none"
+          oninput="searchCore.debounceSearch()" />
 
-        <button onclick="toggleCamera()" class="mr-2 bg-slate-900 dark:bg-blue-600 text-white p-5 rounded-[2.2rem] shadow-xl hover:scale-105 active:scale-95 transition-all">
-          <i data-lucide="scan-line" class="w-7 h-7"></i>
+        <button id="cam-trigger" onclick="uiAction.toggleScanner()" class="mr-2 bg-slate-900 dark:bg-blue-600 text-white p-5 rounded-[2.2rem] shadow-xl hover:scale-105 active:shadow-blue-500/40 transition-all">
+          <i data-lucide="maximize" class="w-7 h-7"></i>
         </button>
       </div>
     </section>
 
-    <div id="result-container" class="hidden space-y-4 fade-in">
-      <div class="bg-white dark:bg-neutral-900 rounded-[2.5rem] shadow-xl border border-slate-100 dark:border-neutral-800 overflow-hidden">
+    <section id="history-area" class="px-2 space-y-3">
+        <div class="flex justify-between items-center">
+            <h3 class="text-[10px] font-black text-slate-400 dark:text-neutral-600 uppercase tracking-[0.2em]">Recent Inquiries</h3>
+            <button onclick="historyManager.clear()" class="text-[9px] font-bold text-blue-500 uppercase">Clear All</button>
+        </div>
+        <div id="history-container" class="flex flex-wrap gap-2.5">
+            </div>
+    </section>
+
+    <main id="results-display" class="hidden space-y-5 item-card-animate">
+      <div class="bg-white dark:bg-neutral-900 rounded-[3rem] shadow-2xl border border-slate-100 dark:border-neutral-800 overflow-hidden">
         
-        <div class="p-6 bg-gradient-to-br from-blue-600 to-indigo-700 text-white">
-          <div class="flex justify-between items-start">
-            <span class="bg-white/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Master Item</span>
-            <button id="main-share-btn" class="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-all">
+        <div class="relative p-7 bg-gradient-to-br from-slate-900 to-slate-800 dark:from-blue-700 dark:to-indigo-900 text-white overflow-hidden">
+          <div class="absolute top-0 right-0 p-8 opacity-10">
+              <i data-lucide="package" class="w-32 h-32"></i>
+          </div>
+          
+          <div class="relative z-10 flex justify-between items-start">
+            <span class="bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10">Base Item (CF 1)</span>
+            <button id="master-share" class="p-3 bg-white/10 rounded-2xl hover:bg-white/20 transition-all">
               <i data-lucide="share-2" class="w-5 h-5"></i>
             </button>
           </div>
-          <h2 id="result-title" class="text-3xl font-black mt-3 leading-tight tracking-tighter"></h2>
-          <div class="flex items-center gap-4 mt-4">
-            <div class="bg-white/10 px-4 py-2 rounded-2xl">
-                <p class="text-[9px] uppercase font-bold opacity-70">Main Barcode</p>
-                <p id="result-barcode" class="font-mono font-bold"></p>
-            </div>
-            <div class="bg-white/10 px-4 py-2 rounded-2xl">
-                <p class="text-[9px] uppercase font-bold opacity-70">Base Price</p>
-                <p id="result-price" class="text-xl font-black"></p>
-            </div>
+
+          <div class="relative z-10 mt-6">
+              <h2 id="master-title" class="text-3xl font-black leading-[1.1] tracking-tighter"></h2>
+              <div class="flex flex-wrap gap-4 mt-6">
+                <div class="bg-white/5 backdrop-blur-sm px-5 py-3 rounded-[1.5rem] border border-white/5">
+                    <p class="text-[8px] uppercase font-black opacity-60 mb-1">Stock ID</p>
+                    <p id="master-code" class="font-mono font-bold text-sm tracking-widest"></p>
+                </div>
+                <div class="bg-blue-500/20 backdrop-blur-sm px-5 py-3 rounded-[1.5rem] border border-blue-400/20">
+                    <p class="text-[8px] uppercase font-black text-blue-200 mb-1">Standard Price</p>
+                    <p id="master-price" class="text-2xl font-black"></p>
+                </div>
+              </div>
           </div>
         </div>
 
-        <div class="p-6 space-y-4">
-            <h3 class="text-[10px] font-black text-slate-400 dark:text-neutral-500 uppercase tracking-[0.2em]">Packing Variations (CF)</h3>
-            <div id="variation-list" class="space-y-3">
+        <div class="p-7 space-y-5">
+            <div class="flex items-center gap-3">
+                <div class="h-[1px] bg-slate-100 dark:bg-neutral-800 flex-grow"></div>
+                <h3 class="text-[10px] font-black text-slate-400 dark:text-neutral-500 uppercase tracking-[0.3em]">Available Packing</h3>
+                <div class="h-[1px] bg-slate-100 dark:bg-neutral-800 flex-grow"></div>
+            </div>
+            
+            <div id="variant-grid" class="space-y-3">
                 </div>
         </div>
 
-        <div id="full-details" class="px-6 pb-6 pt-2 divide-y divide-slate-50 dark:divide-neutral-800 hidden">
-            </div>
-        
-        <button onclick="toggleDetails()" class="w-full py-4 text-[10px] font-black uppercase text-slate-400 border-t border-slate-50 dark:border-neutral-800 hover:bg-slate-50 dark:hover:bg-neutral-800 transition-all">
-            Show All Technical Data
-        </button>
-      </div>
-    </div>
-
-    <div id="list-container" class="hidden fade-in">
-      <div class="bg-white dark:bg-neutral-900 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-neutral-800 overflow-hidden">
-        <div id="match-list" class="divide-y divide-slate-50 dark:divide-neutral-800"></div>
-      </div>
-    </div>
-
-    <section id="history-section" class="px-2">
-        <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Recent Searches</h3>
-        <div id="history-list" class="flex flex-wrap gap-2">
-            </div>
-    </section>
-
-    <div id="no-result" class="hidden fade-in text-center py-16">
-        <div class="bg-slate-100 dark:bg-neutral-900 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
-          <i data-lucide="search-x" class="text-slate-300 w-10 h-10"></i>
+        <div class="px-7 pb-7">
+            <button onclick="uiAction.toggleTechSpecs()" class="w-full py-4 flex items-center justify-center gap-3 bg-slate-50 dark:bg-neutral-800/50 rounded-[1.8rem] text-[10px] font-black uppercase text-slate-400 hover:text-blue-500 transition-all">
+                <i data-lucide="database" class="w-4 h-4"></i>
+                Technical Master Data
+                <i data-lucide="chevron-down" class="w-4 h-4" id="tech-chevron"></i>
+            </button>
+            <div id="tech-specs" class="hidden mt-4 space-y-1 divide-y divide-slate-50 dark:divide-neutral-800">
+                </div>
         </div>
-        <h3 class="font-black text-slate-800 dark:text-neutral-300">No Product Found</h3>
-        <p class="text-sm text-slate-400 mt-1">Check the barcode or spelling</p>
+
+      </div>
+    </main>
+
+    <div id="multi-match-container" class="hidden space-y-4 item-card-animate">
+        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Multiple Results Found</p>
+        <div id="multi-match-list" class="bg-white dark:bg-neutral-900 rounded-[2.5rem] shadow-lg border border-slate-100 dark:border-neutral-800 overflow-hidden divide-y divide-slate-50 dark:divide-neutral-800">
+            </div>
     </div>
+
+    <div id="empty-state" class="hidden item-card-animate text-center py-20">
+        <div class="w-24 h-24 bg-slate-100 dark:bg-neutral-900 rounded-[2.5rem] flex items-center justify-center mx-auto mb-6">
+          <i data-lucide="search-x" class="text-slate-300 w-12 h-12"></i>
+        </div>
+        <h3 class="text-xl font-black text-slate-800 dark:text-neutral-300">Item Not Listed</h3>
+        <p class="text-sm text-slate-400 mt-2 px-10">We couldn't find any products matching that barcode or name.</p>
+    </div>
+
+    <footer class="pt-8 opacity-40 grayscale pointer-events-none">
+      <img src="banner.png" class="w-full rounded-[2.5rem] scale-95" alt="K Mart Footer">
+    </footer>
 
   </div>
 
   <script>
     /**
-     * GLOBAL APP STATE
+     * GLOBAL SYSTEM STATE
      */
-    let inventory = [];
-    let headers = [];
-    let html5QrCode = null;
-    let searchHistory = JSON.parse(localStorage.getItem('kmart_history') || '[]');
+    let _DB = [];
+    let _HEADERS = [];
+    let _SCANNER = null;
+    let _DEBOUNCE = null;
 
-    lucide.createIcons();
+    /**
+     * CORE UI ACTIONS
+     */
+    const uiAction = {
+        toggleScanner: () => {
+            const el = document.getElementById("camera-section");
+            if (!el.classList.contains("hidden")) uiAction.stopScanner();
+            else uiAction.startScanner();
+        },
+        startScanner: () => {
+            document.getElementById("camera-section").classList.remove("hidden");
+            _SCANNER = new Html5Qrcode("reader");
+            const config = { fps: 30, qrbox: { width: 250, height: 120 }, aspectRatio: 1.0 };
+            
+            _SCANNER.start({ facingMode: "environment" }, config, (decodedText) => {
+                document.getElementById("master-search-input").value = decodedText;
+                uiAction.stopScanner();
+                searchCore.execute();
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            }).catch(err => alert("Camera permission denied"));
+        },
+        stopScanner: () => {
+            if (_SCANNER) {
+                _SCANNER.stop().then(() => { 
+                    _SCANNER.clear(); 
+                    _SCANNER = null; 
+                    document.getElementById("camera-section").classList.add("hidden");
+                });
+            }
+        },
+        toggleTechSpecs: () => {
+            const el = document.getElementById("tech-specs");
+            const icon = document.getElementById("tech-chevron");
+            el.classList.toggle("hidden");
+            icon.style.transform = el.classList.contains("hidden") ? "rotate(0deg)" : "rotate(180deg)";
+        },
+        updateStatus: (type, msg) => {
+            const dot = document.getElementById("status-dot");
+            const text = document.getElementById("status-text");
+            const badge = document.getElementById("status-badge");
 
-    window.onload = () => {
-        fetchData();
-        renderHistory();
-        if ("serviceWorker" in navigator) {
-            navigator.serviceWorker.register("service-worker.js").catch(e => console.log(e));
+            text.innerText = msg;
+            if (type === 'success') {
+                dot.className = "w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_#22c55e]";
+                badge.className = "flex items-center gap-2 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-full border border-green-100 dark:border-green-800";
+            } else if (type === 'error') {
+                dot.className = "w-2 h-2 rounded-full bg-red-500";
+                badge.className = "flex items-center gap-2 bg-red-50 dark:bg-red-900/20 px-3 py-1.5 rounded-full border border-red-100 dark:border-red-800";
+            }
         }
     };
 
     /**
-     * DATA CORE
+     * SEARCH ENGINE LOGIC
      */
-    async function fetchData() {
-      const sheetId = document.getElementById("sheet-id").value;
-      const gid = document.getElementById("gid-id").value;
-      const statusText = document.getElementById("status-text");
-      const statusDot = document.getElementById("status-dot");
+    const searchCore = {
+        debounceSearch: () => {
+            clearTimeout(_DEBOUNCE);
+            _DEBOUNCE = setTimeout(() => searchCore.execute(), 350);
+        },
+        execute: () => {
+            const query = document.getElementById("master-search-input").value.trim().toLowerCase();
+            const resDisplay = document.getElementById("results-display");
+            const multiDisplay = document.getElementById("multi-match-container");
+            const emptyState = document.getElementById("empty-state");
 
-      try {
-        const response = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`);
-        if (!response.ok) throw new Error();
-        const rawText = await response.text();
-        inventory = parseCSV(rawText);
-        headers = Object.keys(inventory[0]);
+            // Hide all views
+            resDisplay.classList.add("hidden");
+            multiDisplay.classList.add("hidden");
+            emptyState.classList.add("hidden");
 
-        statusText.innerText = `Online • ${inventory.length} Items`;
-        statusDot.className = "w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]";
-        
-        document.getElementById("last-update-time").innerText = "Sync: " + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-      } catch (err) {
-        statusText.innerText = "Offline";
-        statusDot.className = "w-2 h-2 rounded-full bg-red-500";
-      }
-    }
+            if (query.length < 2) return;
 
-    /**
-     * SEARCH ENGINE
-     */
-    function handleSearch() {
-      const query = document.getElementById("smart-search-input").value.trim().toLowerCase();
-      
-      const resCon = document.getElementById("result-container");
-      const listCon = document.getElementById("list-container");
-      const noRes = document.getElementById("no-result");
+            // 1. Barcode Exact Match
+            let matches = _DB.filter(row => String(Object.values(row)[0]).toLowerCase() === query);
 
-      resCon.classList.add("hidden");
-      listCon.classList.add("hidden");
-      noRes.classList.add("hidden");
+            // 2. Name Partial Match
+            if (matches.length === 0) {
+                const terms = query.split(/\s+/).filter(t => t);
+                matches = _DB.filter(row => {
+                    const itemName = String(Object.values(row)[1]).toLowerCase();
+                    return terms.every(t => itemName.includes(t));
+                });
+            }
 
-      if (query.length < 2) return;
-
-      let results = [];
-      
-      // 1. Try Barcode Match (Exact)
-      results = inventory.filter(row => String(Object.values(row)[0]).toLowerCase() === query);
-
-      // 2. Try Name Match (Tokens)
-      if (results.length === 0) {
-        const tokens = query.split(/\s+/).filter(t => t);
-        results = inventory.filter(row => {
-          const name = String(Object.values(row)[1]).toLowerCase();
-          return tokens.every(t => name.includes(t));
-        });
-      }
-
-      if (results.length === 0) {
-        noRes.classList.remove("hidden");
-      } else {
-        processResults(results);
-      }
-    }
-
-    /**
-     * PROCESS & GROUPING LOGIC (The CF Logic)
-     */
-    function processResults(matches) {
-        // Find the "Main" item (Try to find CF = 1 or use the first name-match)
-        // We group by Name (Column index 1)
-        const primaryName = Object.values(matches[0])[1];
-        
-        // Find all items with this exact name in the whole inventory
-        const allVariations = inventory.filter(row => Object.values(row)[1] === primaryName);
-        
-        // Sort: CF 1 should be first
-        allVariations.sort((a, b) => {
-            const cfA = parseFloat(a['CF'] || a['cf'] || 0);
-            const cfB = parseFloat(b['CF'] || b['cf'] || 0);
-            return cfA === 1 ? -1 : (cfB === 1 ? 1 : cfA - cfB);
-        });
-
-        renderGroupedUI(allVariations);
-        addToHistory(primaryName);
-    }
-
-    function renderGroupedUI(variations) {
-        const main = variations[0];
-        const resCon = document.getElementById("result-container");
-        resCon.classList.remove("hidden");
-
-        document.getElementById("result-title").innerText = Object.values(main)[1];
-        document.getElementById("result-barcode").innerText = Object.values(main)[0];
-        document.getElementById("result-price").innerText = "AED " + (main['Price'] || main['PRICE'] || main['mrp'] || '0.00');
-
-        // Variations List
-        const varList = document.getElementById("variation-list");
-        varList.innerHTML = "";
-
-        variations.forEach((v, idx) => {
-            const cfVal = v['CF'] || v['cf'] || '1';
-            const priceVal = v['Price'] || v['PRICE'] || v['mrp'] || '0.00';
-            const barcodeVal = Object.values(v)[0];
-
-            const item = document.createElement("div");
-            item.className = `flex items-center justify-between p-4 rounded-3xl border ${idx === 0 ? 'bg-blue-50 border-blue-100 dark:bg-blue-900/20 dark:border-blue-800' : 'bg-slate-50 dark:bg-neutral-800/40 border-slate-100 dark:border-neutral-800'}`;
+            if (matches.length === 0) {
+                emptyState.classList.remove("hidden");
+            } else if (matches.length === 1 || searchCore.isSameProduct(matches)) {
+                searchCore.renderGrouped(matches);
+            } else {
+                searchCore.renderMultiList(matches);
+            }
+        },
+        isSameProduct: (matches) => {
+            const firstName = Object.values(matches[0])[1];
+            return matches.every(m => Object.values(m)[1] === firstName);
+        },
+        renderGrouped: (matches) => {
+            const productName = Object.values(matches[0])[1];
+            // Find ALL versions of this product in whole DB for CF logic
+            const allVariants = _DB.filter(row => Object.values(row)[1] === productName);
             
-            item.innerHTML = `
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-white dark:bg-neutral-800 flex items-center justify-center font-black text-xs shadow-sm">
-                        ${cfVal}
+            // Sort: CF 1 on top, then others
+            allVariants.sort((a, b) => {
+                const cfA = parseFloat(a['CF'] || a['cf'] || 0);
+                const cfB = parseFloat(b['CF'] || b['cf'] || 0);
+                if (cfA === 1) return -1;
+                if (cfB === 1) return 1;
+                return cfA - cfB;
+            });
+
+            const main = allVariants[0];
+            document.getElementById("results-display").classList.remove("hidden");
+            document.getElementById("master-title").innerText = productName;
+            document.getElementById("master-code").innerText = Object.values(main)[0];
+            document.getElementById("master-price").innerText = "AED " + (main['Price'] || main['mrp'] || '0.00');
+            
+            // Master Share
+            document.getElementById("master-share").onclick = () => shareUtils.send(main);
+
+            // Render Variants
+            const grid = document.getElementById("variant-grid");
+            grid.innerHTML = "";
+            allVariants.forEach((v, idx) => {
+                const cf = v['CF'] || v['cf'] || '1';
+                const price = v['Price'] || v['mrp'] || '0.00';
+                const code = Object.values(v)[0];
+
+                const card = document.createElement("div");
+                card.className = `flex items-center justify-between p-5 rounded-[2rem] border transition-all ${idx === 0 ? 'bg-blue-50/50 border-blue-100 dark:bg-blue-900/10 dark:border-blue-800' : 'bg-slate-50 dark:bg-neutral-800/40 border-slate-100 dark:border-neutral-800'}`;
+                card.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-white dark:bg-neutral-800 flex flex-col items-center justify-center border border-slate-100 dark:border-neutral-700 shadow-sm">
+                            <span class="text-[8px] font-black text-slate-400 uppercase leading-none mb-0.5">CF</span>
+                            <span class="text-sm font-black text-blue-600">${cf}</span>
+                        </div>
+                        <div>
+                            <p class="text-xs font-mono font-bold text-slate-500 dark:text-neutral-400">${code}</p>
+                            <p class="text-[8px] font-black text-slate-300 uppercase tracking-widest mt-0.5">Barcode ID</p>
+                        </div>
                     </div>
+                    <div class="flex items-center gap-4">
+                        <div class="text-right">
+                            <p class="text-xl font-black text-slate-900 dark:text-white leading-none">AED ${price}</p>
+                        </div>
+                        <button onclick="shareUtils.sendByIdx('${_DB.indexOf(v)}')" class="p-3 bg-white dark:bg-neutral-800 rounded-2xl shadow-sm hover:text-green-500 transition-colors">
+                            <i data-lucide="share" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            // Render Tech Specs
+            const specs = document.getElementById("tech-specs");
+            specs.innerHTML = "";
+            _HEADERS.forEach(h => {
+                specs.innerHTML += `
+                    <div class="py-3.5 flex justify-between items-center px-2">
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">${h}</span>
+                        <span class="text-[11px] font-bold text-slate-700 dark:text-neutral-300">${main[h] || 'N/A'}</span>
+                    </div>
+                `;
+            });
+
+            historyManager.add(productName);
+            lucide.createIcons();
+        },
+        renderMultiList: (items) => {
+            const container = document.getElementById("multi-match-container");
+            const list = document.getElementById("multi-match-list");
+            container.classList.remove("hidden");
+            list.innerHTML = "";
+
+            // Show unique products only
+            const uniqueItems = Array.from(new Set(items.map(i => Object.values(i)[1])))
+                                     .map(name => items.find(i => Object.values(i)[1] === name));
+
+            uniqueItems.forEach(item => {
+                const name = Object.values(item)[1];
+                const code = Object.values(item)[0];
+                const row = document.createElement("button");
+                row.className = "w-full p-6 flex justify-between items-center text-left hover:bg-slate-50 dark:hover:bg-neutral-800 transition-all";
+                row.innerHTML = `
                     <div>
-                        <p class="text-[10px] font-black text-slate-400 uppercase">Packing Unit</p>
-                        <p class="text-xs font-mono font-bold text-slate-500">${barcodeVal}</p>
+                        <p class="font-bold text-slate-900 dark:text-white">${name}</p>
+                        <p class="text-[10px] font-mono text-slate-400 mt-1 uppercase">${code}</p>
                     </div>
-                </div>
-                <div class="text-right flex items-center gap-3">
-                    <div>
-                        <p class="text-lg font-black dark:text-white">AED ${priceVal}</p>
-                    </div>
-                    <button onclick="shareItem('${Object.values(v)[1]}', '${barcodeVal}', '${priceVal}', '${cfVal}')" class="p-2 text-slate-400 hover:text-green-500 transition-colors">
-                        <i data-lucide="share" class="w-4 h-4"></i>
-                    </button>
-                </div>
-            `;
-            varList.appendChild(item);
-        });
-
-        // Technical Details Injection
-        const details = document.getElementById("full-details");
-        details.innerHTML = "";
-        headers.forEach(h => {
-            details.innerHTML += `<div class="py-3 flex justify-between"><span class="text-[10px] font-bold text-slate-400 uppercase">${h}</span><span class="text-xs font-bold dark:text-white">${main[h]}</span></div>`;
-        });
-
-        lucide.createIcons();
-    }
-
-    /**
-     * VOICE SEARCH
-     */
-    function startVoiceSearch() {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SpeechRecognition) return alert("Voice search not supported on this browser.");
-        
-        const rec = new SpeechRecognition();
-        rec.lang = 'en-US';
-        const btn = document.getElementById("voice-btn");
-        
-        rec.onstart = () => { btn.classList.add("text-blue-500", "pulse-blue"); };
-        rec.onresult = (e) => {
-            const transcript = e.results[0][0].transcript;
-            document.getElementById("smart-search-input").value = transcript;
-            handleSearch();
-        };
-        rec.onend = () => { btn.classList.remove("text-blue-500", "pulse-blue"); };
-        rec.start();
-    }
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300"></i>
+                `;
+                row.onclick = () => {
+                    document.getElementById("master-search-input").value = name;
+                    searchCore.execute();
+                };
+                list.appendChild(row);
+            });
+            lucide.createIcons();
+        },
+        initVoice: () => {
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRec) return alert("Speech Recognition not supported.");
+            
+            const rec = new SpeechRec();
+            const btn = document.getElementById("voice-trigger");
+            
+            rec.onstart = () => btn.classList.add("text-blue-600", "scale-125");
+            rec.onresult = (e) => {
+                const text = e.results[0][0].transcript.replace(/[.]/g, '');
+                document.getElementById("master-search-input").value = text;
+                searchCore.execute();
+            };
+            rec.onend = () => btn.classList.remove("text-blue-600", "scale-125");
+            rec.start();
+        }
+    };
 
     /**
-     * CAMERA SYSTEM
+     * DATA FETCHING & PARSING
      */
-    function toggleCamera() {
-      const con = document.getElementById("reader-container");
-      if (!con.classList.contains("hidden")) stopCamera();
-      else startCamera();
-    }
+    async function initDatabase() {
+        const sid = document.getElementById("cfg-sheet-id").value;
+        const gid = document.getElementById("cfg-gid-id").value;
+        uiAction.updateStatus('process', 'Syncing Data...');
 
-    function startCamera() {
-      document.getElementById("reader-container").classList.remove("hidden");
-      html5QrCode = new Html5Qrcode("reader");
-      html5QrCode.start({ facingMode: "environment" }, { fps: 25, qrbox: { width: 250, height: 120 } }, 
-        (txt) => {
-          document.getElementById("smart-search-input").value = txt;
-          stopCamera();
-          handleSearch();
-          if (navigator.vibrate) navigator.vibrate(100);
-        }, () => {});
-    }
+        try {
+            const url = `https://docs.google.com/spreadsheets/d/${sid}/export?format=csv&gid=${gid}`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error();
+            
+            const csvText = await res.text();
+            _DB = dataParser.parseCSV(csvText);
+            _HEADERS = Object.keys(_DB[0]);
 
-    function stopCamera() {
-      if (html5QrCode) {
-        html5QrCode.stop().then(() => { html5QrCode.clear(); html5QrCode = null; });
-      }
-      document.getElementById("reader-container").classList.add("hidden");
-    }
-
-    /**
-     * UTILS
-     */
-    function toggleDetails() {
-        document.getElementById("full-details").classList.toggle("hidden");
-    }
-
-    function shareItem(name, code, price, cf) {
-        const text = `🛒 *K MART AL RAFFA*\n\n*Product:* ${name}\n*Barcode:* ${code}\n*Price:* AED ${price}\n*Packing (CF):* ${cf}\n\n_Checked via K-Mart Item Master_`;
-        if (navigator.share) {
-            navigator.share({ title: 'Product Info', text: text });
-        } else {
-            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`);
+            uiAction.updateStatus('success', `Online • ${_DB.length} Items`);
+            document.getElementById("sync-time").innerText = "Last Sync: " + new Date().toLocaleTimeString();
+            
+        } catch (err) {
+            uiAction.updateStatus('error', 'Connection Error');
         }
     }
 
-    function addToHistory(name) {
-        searchHistory = [name, ...searchHistory.filter(i => i !== name)].slice(0, 8);
-        localStorage.setItem('kmart_history', JSON.stringify(searchHistory));
-        renderHistory();
-    }
+    const dataParser = {
+        parseCSV: (text) => {
+            const lines = text.split(/\r?\n/);
+            if (lines.length < 2) return [];
+            const headerRow = dataParser.splitLine(lines[0]);
+            const data = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                const values = dataParser.splitLine(line);
+                const obj = {};
+                headerRow.forEach((h, idx) => {
+                    obj[h.trim()] = values[idx] ? values[idx].trim() : "";
+                });
+                data.push(obj);
+            }
+            return data;
+        },
+        splitLine: (line) => {
+            const res = [];
+            let curr = "";
+            let inQuotes = false;
+            for (let char of line) {
+                if (char === '"') inQuotes = !inQuotes;
+                else if (char === ',' && !inQuotes) { res.push(curr); curr = ""; }
+                else curr += char;
+            }
+            res.push(curr);
+            return res;
+        }
+    };
 
-    function renderHistory() {
-        const container = document.getElementById("history-list");
-        container.innerHTML = "";
-        searchHistory.forEach(item => {
-            const pill = document.createElement("button");
-            pill.className = "px-4 py-2 bg-white dark:bg-neutral-900 border border-slate-100 dark:border-neutral-800 rounded-full text-xs font-bold text-slate-500 hover:border-blue-500 transition-all";
-            pill.innerText = item;
-            pill.onclick = () => {
-                document.getElementById("smart-search-input").value = item;
-                handleSearch();
-            };
-            container.appendChild(pill);
-        });
-    }
+    /**
+     * UTILITIES: SHARE & HISTORY
+     */
+    const shareUtils = {
+        send: (item) => {
+            const name = Object.values(item)[1];
+            const code = Object.values(item)[0];
+            const price = item['Price'] || item['mrp'] || '0.00';
+            const cf = item['CF'] || item['cf'] || '1';
+            
+            const msg = `🛒 *K MART AL RAFFA*\n\n*Product:* ${name}\n*Barcode:* ${code}\n*Price:* AED ${price}\n*Packing Unit:* ${cf}\n\n_Checked via K-Mart Smart Master_`;
+            
+            if (navigator.share) {
+                navigator.share({ title: 'K-Mart Price Check', text: msg });
+            } else {
+                window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+            }
+        },
+        sendByIdx: (idx) => shareUtils.send(_DB[idx])
+    };
 
-    function parseCSV(text) {
-      const lines = text.split(/\r?\n/);
-      if (lines.length < 2) return [];
-      const head = splitCSVLine(lines[0]);
-      return lines.slice(1).filter(l => l.trim()).map(line => {
-        const vals = splitCSVLine(line);
-        let obj = {};
-        head.forEach((h, idx) => { obj[h.trim()] = vals[idx] ? vals[idx].trim() : ""; });
-        return obj;
-      });
-    }
+    const historyManager = {
+        add: (name) => {
+            let hist = JSON.parse(localStorage.getItem('kmart_recent') || '[]');
+            hist = [name, ...hist.filter(x => x !== name)].slice(0, 10);
+            localStorage.setItem('kmart_recent', JSON.stringify(hist));
+            historyManager.render();
+        },
+        render: () => {
+            const hist = JSON.parse(localStorage.getItem('kmart_recent') || '[]');
+            const cont = document.getElementById("history-container");
+            cont.innerHTML = "";
+            hist.forEach(name => {
+                const btn = document.createElement("button");
+                btn.className = "history-pill px-5 py-2.5 rounded-full text-xs font-bold text-slate-500 dark:text-neutral-400 border border-slate-100 dark:border-neutral-800 shadow-sm";
+                btn.innerText = name;
+                btn.onclick = () => {
+                    document.getElementById("master-search-input").value = name;
+                    searchCore.execute();
+                };
+                cont.appendChild(btn);
+            });
+        },
+        clear: () => {
+            localStorage.removeItem('kmart_recent');
+            historyManager.render();
+        }
+    };
 
-    function splitCSVLine(line) {
-      const parts = []; let current = ""; let inside = false;
-      for (let char of line) {
-        if (char === '"') inside = !inside;
-        else if (char === ',' && !inside) { parts.push(current); current = ""; }
-        else current += char;
-      }
-      parts.push(current); return parts;
-    }
-
-    const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    function setLogo(isDark) { document.getElementById('app-logo').src = isDark ? 'icon-dark-512.png' : 'icon-512.png'; }
-    setLogo(darkModeQuery.matches);
-    darkModeQuery.addEventListener('change', e => setLogo(e.matches));
+    /**
+     * INITIALIZATION
+     */
+    window.onload = () => {
+        initDatabase();
+        historyManager.render();
+        
+        // Dynamic Logo Theme
+        const themeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        const updateLogo = (isDark) => {
+            document.getElementById('app-logo').src = isDark ? 'icon-dark-512.png' : 'icon-512.png';
+        };
+        updateLogo(themeQuery.matches);
+        themeQuery.addEventListener('change', e => updateLogo(e.matches));
+    };
   </script>
 </body>
 </html>
