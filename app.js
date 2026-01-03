@@ -334,12 +334,13 @@ function openItemModal(groupRows) {
       "hover:bg-slate-50 dark:hover:bg-slate-900 transition whitespace-nowrap";
 
     tr.innerHTML = `
-      <td class="px-3 py-2">${cf}</td>
-      <td class="px-3 py-2 font-mono text-[11px]">${row["ItemBarCode"]}</td>
-      <td class="px-3 py-2 text-right">${row["CostPrice"]}</td>
-      <td class="px-3 py-2 text-right">${row["MRP"]}</td>
-      <td class="px-3 py-2 text-right font-semibold">${stock}</td>
-    `;
+  <td class="px-3 py-2 text-slate-700 dark:text-slate-200">${cf}</td>
+  <td class="px-3 py-2 font-mono text-[11px] text-slate-600 dark:text-slate-300">${row["ItemBarCode"]}</td>
+  <td class="px-3 py-2 text-right text-slate-700 dark:text-slate-200">${row["CostPrice"]}</td>
+  <td class="px-3 py-2 text-right text-slate-700 dark:text-slate-200">${row["MRP"]}</td>
+  <td class="px-3 py-2 text-right font-semibold text-slate-800 dark:text-slate-100">${stock}</td>
+`;
+
 
     rowsEl.appendChild(tr);
   });
