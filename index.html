@@ -422,9 +422,12 @@
       </button>
 
       <!-- Capture area -->
-      <div id="popup-card" class="space-y-4">
-        <div class="flex items-start gap-3">
-          <div
+<div id="popup-card-wrapper" class="bg-white dark:bg-neutral-950 rounded-2xl p-4">
+  <div id="popup-card" class="space-y-4">
+    ...
+  </div>
+</div>
+
             class="w-10 h-10 rounded-2xl bg-slate-900 dark:bg-slate-100 flex items-center justify-center"
           >
             <i
@@ -961,49 +964,62 @@
     }
 
     /**
-     * SHARE POPUP AS IMAGE
-     */
-    document.getElementById("share-btn").onclick = async () => {
-      const card = document.getElementById("popup-card");
-      if (!card) return;
+ * SHARE POPUP AS IMAGE (SIMPLIFIED + SAFE)
+ */
+document.getElementById("share-btn").onclick = async () => {
+  const card = document.getElementById("popup-card-wrapper");
+  if (!card) return;
 
-      try {
-        const canvas = await html2canvas(card, {
-          scale: 2,
-          backgroundColor: null,
-        });
+  try {
+    const canvas = await html2canvas(card, {
+      scale: window.devicePixelRatio > 2 ? 1.5 : 2,
+      backgroundColor: null
+    });
 
-        canvas.toBlob(async (blob) => {
-          if (!blob) return;
-          const file = new File([blob], "item-details.png", {
-            type: "image/png",
-          });
+    // 1) Quick visual check – open image in a new tab
+    //    (You can comment this out later)
+    const previewUrl = canvas.toDataURL("image/png");
+    // window.open(previewUrl, "_blank"); // uncomment if you want to test preview
 
-          if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-            try {
-              await navigator.share({
-                title: "Item Details",
-                files: [file],
-              });
-            } catch (err) {
-              console.log("Share cancelled", err);
-            }
-          } else if (navigator.share) {
-            // Fallback: share without files if needed
-            const dataUrl = canvas.toDataURL("image/png");
-            await navigator.share({
-              title: "Item Details",
-              text: "Item details from K MART.",
-              url: dataUrl,
-            });
-          } else {
-            alert("Sharing not supported on this device.");
-          }
-        });
-      } catch (err) {
-        console.error("Share error:", err);
+    // 2) Try file sharing if supported
+    canvas.toBlob(async (blob) => {
+      if (!blob) {
+        alert("Could not create image blob.");
+        return;
       }
-    };
+
+      const file = new File([blob], "item-details.png", { type: "image/png" });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            title: "Item Details",
+            files: [file]
+          });
+          return;
+        } catch (err) {
+          console.log("Share cancelled or failed:", err);
+        }
+      }
+
+      // 3) Fallback: just download the image if share not supported
+      const a = document.createElement("a");
+      a.href = previewUrl;
+      a.download = "item-details.png";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      if (!navigator.share) {
+        alert("This device cannot open the share sheet. Image downloaded instead.");
+      }
+    });
+  } catch (err) {
+    console.error("Share error:", err);
+    alert("Image creation failed. Check console for details.");
+  }
+};
+
 
     /**
      * CSV PARSER
