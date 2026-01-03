@@ -3,207 +3,193 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>K MART - MASTER PRO v4</title>
+  <title>K MART PRO MASTER</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
     
-    :root {
-      --bg-light: #f8fafc; --card-light: #ffffff; --text-light: #0f172a; --border-light: #e2e8f0;
-      --bg-dark: #000000; --card-dark: #111111; --text-dark: #f1f5f9; --border-dark: #1e293b;
+    body { 
+      font-family: 'Inter', sans-serif; 
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
     }
 
-    body { font-family: 'Inter', sans-serif; transition: all 0.3s ease; background-color: var(--bg-light); color: var(--text-light); -webkit-user-select: none; user-select: none; }
+    /* Light Mode (Forced visibility) */
+    @media (prefers-color-scheme: light) {
+      body { background-color: #f1f5f9; color: #0f172a; }
+      .glass-card { background: #ffffff; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+      .text-dim { color: #64748b; }
+      .search-box { background: #ffffff; border: 2px solid #94a3b8; }
+      .modal-content { background: #ffffff; }
+    }
 
+    /* Dark Mode */
     @media (prefers-color-scheme: dark) {
-      body { background-color: var(--bg-dark); color: var(--text-dark); }
-      .glass-card { background-color: var(--card-dark); border-color: var(--border-dark); }
-      .search-box { background-color: var(--card-dark); border-color: var(--border-dark); }
+      body { background-color: #000000; color: #f8fafc; }
+      .glass-card { background: #111111; border: 1px solid #1e293b; }
+      .text-dim { color: #94a3b8; }
+      .search-box { background: #111111; border: 1px solid #334155; }
+      .modal-content { background: #0a0a0a; }
     }
-
-    .glass-card { border-width: 1px; border-radius: 2rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-    .search-box { border-width: 1px; border-radius: 3rem; transition: all 0.2s; }
 
     #item-modal {
       display: none; position: fixed; inset: 0; z-index: 1000;
-      background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
+      background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
       align-items: flex-end; justify-content: center;
     }
-    #item-modal.active { display: flex; animation: slideUp 0.3s ease-out; }
-    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    #item-modal.active { display: flex; }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
   </style>
 </head>
+<body class="min-h-screen pb-20">
 
-<body class="min-h-screen pb-10">
-
-  <div class="max-w-2xl mx-auto px-4 py-6 space-y-6">
-
+  <div class="max-w-xl mx-auto px-4 py-6 space-y-6">
     <header class="flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <img src="icon-192.jpeg" class="w-12 h-12 rounded-2xl shadow-lg border-2 border-white dark:border-neutral-800">
+        <div class="p-1 bg-white rounded-xl border-2 border-slate-200">
+          <img src="icon-192.jpeg" class="w-10 h-10 rounded-lg object-cover">
+        </div>
         <div>
-          <h1 class="text-xl font-black uppercase tracking-tighter leading-none">K Mart</h1>
-          <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Al Raffa • Item Master</p>
+          <h1 class="text-xl font-black tracking-tighter uppercase leading-none">K Mart</h1>
+          <p class="text-[10px] font-bold text-dim uppercase tracking-widest mt-1">Al Raffa • Pro Master</p>
         </div>
       </div>
-      <div class="flex items-center gap-2 px-4 py-2 rounded-full glass-card bg-white dark:bg-neutral-900">
+      <div class="flex items-center gap-2 px-4 py-2 rounded-full glass-card">
         <div id="sync-dot" class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>
-        <span id="sync-text" class="text-[9px] font-black uppercase tracking-tight text-gray-400">Syncing...</span>
+        <span id="sync-text" class="text-[9px] font-black uppercase">Syncing...</span>
       </div>
     </header>
 
-    <div class="hidden">
-      <input id="cfg-sheet-id" value="1eEFtb7wxOOLw-TFTf_NvSFq1VQy1qYlMoVmiZkFgUys">
-      <input id="cfg-gid-id" value="710656272">
+    <div class="search-box p-2 flex items-center rounded-[2rem] shadow-2xl">
+      <button onclick="engine.startVoice()" class="p-4 text-slate-400 hover:text-blue-500"><i data-lucide="mic"></i></button>
+      <input id="main-input" type="text" placeholder="Scan Barcode or Name..." 
+        class="w-full bg-transparent py-4 px-2 text-lg font-bold outline-none placeholder:text-slate-400"
+        oninput="engine.debounce()">
+      <button onclick="ui.toggleScanner()" class="bg-slate-900 dark:bg-slate-100 text-white dark:text-black p-4 rounded-2xl shadow-xl active:scale-90 transition-all">
+        <i data-lucide="camera"></i>
+      </button>
     </div>
 
-    <section class="search-box p-2 flex items-center bg-white dark:bg-neutral-900 shadow-2xl">
-      <button onclick="engine.startVoice()" class="p-4 text-gray-400 hover:text-blue-500 transition-all">
-        <i data-lucide="mic" class="w-7 h-7"></i>
-      </button>
-      <input id="main-input" type="text" placeholder="Scan or Type name..." 
-        class="w-full bg-transparent py-5 px-2 text-xl font-bold outline-none placeholder:text-gray-300 dark:placeholder:text-neutral-800"
-        oninput="engine.debounce()">
-      <button onclick="ui.toggleScanner()" class="bg-black dark:bg-white text-white dark:text-black p-5 rounded-[2.1rem] shadow-xl active:scale-95 transition-all">
-        <i data-lucide="scan-barcode" class="w-7 h-7"></i>
-      </button>
-    </section>
-
-    <div id="scanner-wrap" class="hidden relative h-52 bg-black rounded-[2.5rem] overflow-hidden shadow-inner">
-      <div id="reader"></div>
-      <button onclick="ui.stopScanner()" class="absolute top-4 right-4 bg-red-500/20 text-red-500 p-2 rounded-full z-10"><i data-lucide="x"></i></button>
+    <div id="scanner-wrap" class="hidden relative h-48 bg-black rounded-[2rem] overflow-hidden border-2 border-slate-800">
+      <div id="reader" class="w-full"></div>
+      <button onclick="ui.stopScanner()" class="absolute top-3 right-3 bg-red-500 text-white p-2 rounded-full z-10"><i data-lucide="x" class="w-4 h-4"></i></button>
     </div>
 
     <main id="results-container" class="hidden space-y-6">
-      <article class="glass-card p-8 bg-white dark:bg-neutral-900 border-2 border-slate-50 dark:border-neutral-800">
-        <h2 id="res-name" class="text-3xl font-black tracking-tighter leading-tight mb-8"></h2>
-        <div class="grid grid-cols-2 gap-4">
-          <div class="bg-slate-50 dark:bg-neutral-800/50 p-5 rounded-3xl border border-slate-100 dark:border-neutral-800">
-            <p class="text-[9px] font-black text-gray-400 uppercase mb-1">Cost Price</p>
-            <p id="res-cost" class="font-bold text-lg text-blue-500"></p>
+      <div class="glass-card p-6 rounded-[2.5rem]">
+        <h2 id="res-name" class="text-2xl font-black tracking-tight leading-tight mb-6"></h2>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-slate-100/50 dark:bg-slate-800/40 p-4 rounded-2xl border border-slate-200/50 dark:border-slate-700/50">
+            <p class="text-[9px] font-black text-dim uppercase mb-1">Base Cost (CF1)</p>
+            <p id="res-cost" class="font-bold text-lg text-blue-600 dark:text-blue-400"></p>
           </div>
-          <div class="bg-neutral-900 dark:bg-white text-white dark:text-black p-5 rounded-3xl shadow-xl">
-            <p class="text-[9px] font-black opacity-60 uppercase mb-1">MRP Price</p>
-            <p id="res-mrp" class="text-2xl font-black"></p>
+          <div class="bg-slate-900 dark:bg-white text-white dark:text-black p-4 rounded-2xl">
+            <p class="text-[9px] font-black opacity-50 uppercase mb-1">Base MRP</p>
+            <p id="res-mrp" class="text-xl font-black"></p>
           </div>
         </div>
-      </article>
+      </div>
 
       <div class="space-y-3">
-        <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] px-4">Available Packing (Barcode Based)</p>
+        <p class="text-[10px] font-black text-dim uppercase tracking-[0.3em] px-4">Calculated Stock per Packing</p>
         <div id="variant-list" class="space-y-3"></div>
       </div>
     </main>
 
-    <div id="empty-state" class="hidden text-center py-20 opacity-30">
-      <i data-lucide="package-search" class="w-16 h-16 mx-auto mb-4"></i>
-      <p class="font-black uppercase text-xs tracking-widest">Item Not Found</p>
-    </div>
+    <div id="empty-state" class="hidden text-center py-20 opacity-20"><i data-lucide="search-x" class="w-12 h-12 mx-auto"></i></div>
   </div>
 
   <div id="item-modal">
-    <div class="bg-white dark:bg-neutral-900 w-full max-w-xl rounded-t-[3rem] p-4 shadow-2xl overflow-hidden">
+    <div class="modal-content w-full max-w-lg rounded-t-[3rem] p-4 shadow-2xl">
       <div id="capture-zone" class="p-8 bg-white dark:bg-neutral-900 rounded-[2rem]">
         <div class="flex justify-between items-start mb-6">
-          <div>
-            <h4 class="text-blue-500 font-black text-[10px] uppercase tracking-widest">K MART AL RAFFA</h4>
-            <p id="pop-barcode" class="text-[10px] font-mono font-bold text-gray-400 mt-1"></p>
-          </div>
-          <div id="pop-cf" class="bg-slate-50 dark:bg-neutral-800 px-4 py-2 rounded-2xl font-black text-xs text-blue-500"></div>
+          <h4 class="text-blue-600 font-black text-[10px] tracking-widest uppercase">K MART AL RAFFA</h4>
+          <span id="pop-cf" class="text-[10px] font-black bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg"></span>
         </div>
-        <h3 id="pop-name" class="text-2xl font-black mb-8 leading-tight"></h3>
-        <div id="pop-grid" class="space-y-2 border-t border-slate-50 dark:border-neutral-800 pt-6"></div>
+        <h3 id="pop-name" class="text-2xl font-black mb-6 leading-tight dark:text-white text-slate-900"></h3>
+        <div id="pop-grid" class="space-y-2 border-t pt-4 border-slate-100 dark:border-slate-800"></div>
       </div>
-      <div class="p-6 bg-slate-50 dark:bg-neutral-900/50 flex gap-4">
-        <button onclick="ui.closeModal()" class="p-5 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-neutral-700 rounded-3xl active:scale-90"><i data-lucide="x"></i></button>
-        <button onclick="engine.shareImage()" class="flex-grow py-5 bg-black dark:bg-white text-white dark:text-black rounded-3xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3">
-          <i data-lucide="share-2" class="w-5 h-5"></i> Share Card Image
+      <div class="p-6 flex gap-3">
+        <button onclick="ui.closeModal()" class="p-4 glass-card rounded-2xl"><i data-lucide="x"></i></button>
+        <button onclick="engine.shareImage()" id="share-btn" class="flex-grow py-4 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2">
+          <i data-lucide="share-2" class="w-4 h-4"></i> Share Card
         </button>
       </div>
     </div>
   </div>
 
   <script>
-    let _DB = [], _HEADERS = [], _ACTIVE_SET = [], _SCANNER = null, _TIMER = null;
+    let _DB = [], _ACTIVE_SET = [], _SCANNER = null, _TIMER = null;
 
-    lucide.createIcons();
-
-    // Data Fetching
     async function sync() {
-      const sid = document.getElementById('cfg-sheet-id').value;
-      const gid = document.getElementById('cfg-gid-id').value;
+      const sid = "1eEFtb7wxOOLw-TFTf_NvSFq1VQy1qYlMoVmiZkFgUys";
+      const gid = "710656272";
       try {
         const r = await fetch(`https://docs.google.com/spreadsheets/d/${sid}/export?format=csv&gid=${gid}`);
         const t = await r.text();
         _DB = parseCSV(t);
-        _HEADERS = Object.keys(_DB[0]);
-        document.getElementById('sync-text').innerText = "Online • " + _DB.length + " Items";
-        document.getElementById('sync-dot').className = "w-2 h-2 rounded-full bg-green-500 shadow-lg";
-      } catch (e) {
-        document.getElementById('sync-text').innerText = "Disconnected";
-        document.getElementById('sync-dot').className = "w-2 h-2 rounded-full bg-red-500";
-      }
+        document.getElementById('sync-text').innerText = `Online • ${_DB.length}`;
+        document.getElementById('sync-dot').classList.replace('bg-orange-500', 'bg-green-500');
+      } catch (e) { document.getElementById('sync-text').innerText = "Offline"; }
     }
 
     const engine = {
       debounce: () => { clearTimeout(_TIMER); _TIMER = setTimeout(() => engine.search(), 300); },
-
+      
       search: () => {
         const q = document.getElementById('main-input').value.trim().toLowerCase();
-        const res = document.getElementById('results-container');
-        const emp = document.getElementById('empty-state');
-        if (q.length < 2) { res.classList.add('hidden'); emp.classList.add('hidden'); return; }
-
-        let matches = _DB.filter(i => String(i['ItemBarCode']).toLowerCase() === q);
-        if (matches.length === 0) {
-          matches = _DB.filter(i => String(i['ItemName']).toLowerCase().includes(q));
-        }
+        if (q.length < 2) return;
+        
+        let matches = _DB.filter(i => String(i.ItemBarCode).toLowerCase() === q);
+        if (matches.length === 0) matches = _DB.filter(i => String(i.ItemName).toLowerCase().includes(q));
 
         if (matches.length > 0) {
-          const name = matches[0]['ItemName'];
-          _ACTIVE_SET = _DB.filter(i => i['ItemName'] === name);
-          // CF അനുസരിച്ച് സോർട്ട് ചെയ്യുന്നു
-          _ACTIVE_SET.sort((a,b) => (parseFloat(a['CF']) || 0) - (parseFloat(b['CF']) || 0));
+          _ACTIVE_SET = _DB.filter(i => i.ItemName === matches[0].ItemName);
+          _ACTIVE_SET.sort((a,b) => (a.CF || 1) - (b.CF || 1));
           engine.render();
-          res.classList.remove('hidden'); emp.classList.add('hidden');
-        } else {
-          res.classList.add('hidden'); emp.classList.remove('hidden');
+          document.getElementById('results-container').classList.remove('hidden');
         }
       },
 
       render: () => {
-        const m = _ACTIVE_SET.find(i => i['CF'] == 1) || _ACTIVE_SET[0];
-        document.getElementById('res-name').innerText = m['ItemName'];
-        document.getElementById('res-cost').innerText = "AED " + (m['CostPrice'] || '0.00');
-        document.getElementById('res-mrp').innerText = "AED " + (m['MRP'] || '0.00');
+        const cf1Item = _ACTIVE_SET.find(i => i.CF == 1) || _ACTIVE_SET[0];
+        const baseStock = parseFloat(cf1Item.LiveStock) || 0;
+
+        document.getElementById('res-name').innerText = cf1Item.ItemName;
+        document.getElementById('res-cost').innerText = `AED ${cf1Item.CostPrice}`;
+        document.getElementById('res-mrp').innerText = `AED ${cf1Item.MRP}`;
 
         const list = document.getElementById('variant-list');
         list.innerHTML = "";
-        
+
         _ACTIVE_SET.forEach((item, idx) => {
-          const stock = item['LiveStock'] || '0';
+          const currentCF = parseFloat(item.CF) || 1;
+          // Stock Logic: Base Stock / Current CF
+          const calculatedStock = Math.floor(baseStock / currentCF);
+          
           const card = document.createElement('div');
-          card.className = "glass-card p-6 flex items-center justify-between cursor-pointer bg-white dark:bg-neutral-900 active:scale-95 transition-all";
-          card.onclick = () => ui.openModal(idx);
+          card.className = "glass-card p-5 rounded-[1.5rem] flex items-center justify-between cursor-pointer active:scale-95 transition-all";
+          card.onclick = () => ui.openModal(idx, calculatedStock);
           card.innerHTML = `
             <div class="flex items-center gap-4">
-              <div class="w-10 h-10 rounded-xl bg-slate-50 dark:bg-neutral-800 flex flex-col items-center justify-center border border-slate-100 dark:border-neutral-700">
-                <span class="text-[7px] font-black opacity-30 uppercase">CF</span>
-                <span class="text-xs font-black text-blue-500">${item['CF'] || '1'}</span>
+              <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex flex-col items-center justify-center border dark:border-slate-700">
+                <span class="text-[7px] font-black opacity-40 uppercase">CF</span>
+                <span class="text-xs font-black text-blue-500">${currentCF}</span>
               </div>
               <div>
-                <p class="font-mono font-bold text-xs text-slate-400 tracking-tighter">${item['ItemBarCode']}</p>
-                <p class="text-[8px] font-black uppercase text-slate-300 mt-0.5">Cost: AED ${item['CostPrice']}</p>
+                <p class="font-mono font-bold text-[10px] text-dim">${item.ItemBarCode}</p>
+                <p class="text-[9px] font-black uppercase text-blue-500/60 mt-0.5">Price: AED ${item.MRP}</p>
               </div>
             </div>
             <div class="text-right">
-              <p class="text-lg font-black leading-none mb-1">AED ${item['MRP']}</p>
-              <p class="text-[9px] font-bold ${parseFloat(stock) > 0 ? 'text-green-500' : 'text-red-500'} uppercase">Stock: ${stock} Units</p>
+              <p class="text-lg font-black leading-none mb-1">${calculatedStock}</p>
+              <p class="text-[8px] font-bold text-dim uppercase">Live Units</p>
             </div>
           `;
           list.appendChild(card);
@@ -211,50 +197,51 @@
         lucide.createIcons();
       },
 
+      shareImage: async () => {
+        const btn = document.getElementById('share-btn');
+        btn.innerText = "Processing...";
+        const area = document.getElementById('capture-zone');
+        const canvas = await html2canvas(area, { scale: 2, useCORS: true });
+        canvas.toBlob(blob => {
+          const file = new File([blob], 'kmart.png', { type: 'image/png' });
+          if (navigator.share) navigator.share({ files: [file] });
+          btn.innerHTML = `<i data-lucide="share-2" class="w-4 h-4"></i> Share Card`;
+          lucide.createIcons();
+        });
+      },
+
       startVoice: () => {
         const S = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!S) return alert("Voice not supported");
+        if (!S) return;
         const r = new S();
         r.onresult = (e) => { document.getElementById('main-input').value = e.results[0][0].transcript; engine.search(); };
         r.start();
-      },
-
-      shareImage: async () => {
-        const area = document.getElementById('capture-zone');
-        const canvas = await html2canvas(area, { scale: 3, backgroundColor: null, useCORS: true });
-        canvas.toBlob(async (blob) => {
-          const file = new File([blob], 'kmart_item.png', { type: 'image/png' });
-          if (navigator.share) await navigator.share({ files: [file], title: 'Product Info' });
-        });
       }
     };
 
     const ui = {
       toggleScanner: () => {
         const w = document.getElementById('scanner-wrap');
-        if (w.classList.contains('hidden')) ui.startScanner(); else ui.stopScanner();
+        w.classList.toggle('hidden');
+        if (!w.classList.contains('hidden')) {
+          _SCANNER = new Html5Qrcode("reader");
+          _SCANNER.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, (t) => {
+            document.getElementById('main-input').value = t; ui.stopScanner(); engine.search();
+          });
+        } else ui.stopScanner();
       },
-      startScanner: () => {
-        document.getElementById('scanner-wrap').classList.remove('hidden');
-        _SCANNER = new Html5Qrcode("reader");
-        _SCANNER.start({ facingMode: "environment" }, { fps: 25, qrbox: 250 }, (txt) => {
-          document.getElementById('main-input').value = txt; ui.stopScanner(); engine.search();
-        });
-      },
-      stopScanner: () => {
-        if (_SCANNER) _SCANNER.stop().then(() => { _SCANNER.clear(); document.getElementById('scanner-wrap').classList.add('hidden'); });
-      },
-      openModal: (idx) => {
+      stopScanner: () => { if(_SCANNER) _SCANNER.stop().then(() => { _SCANNER.clear(); document.getElementById('scanner-wrap').classList.add('hidden'); }); },
+      openModal: (idx, calcStock) => {
         const item = _ACTIVE_SET[idx];
-        document.getElementById('pop-name').innerText = item['ItemName'];
-        document.getElementById('pop-barcode').innerText = "ID: " + item['ItemBarCode'];
-        document.getElementById('pop-cf').innerText = "UNIT CF: " + (item['CF'] || '1');
-        const grid = document.getElementById('pop-grid'); grid.innerHTML = "";
-        _HEADERS.forEach(h => {
-          if(item[h]) {
-            grid.innerHTML += `<div class="flex justify-between py-2 border-b border-slate-50 dark:border-neutral-800/40 text-[10px] uppercase font-black tracking-widest text-gray-400"><span>${h}</span><span class="text-slate-900 dark:text-white">${item[h]}</span></div>`;
-          }
-        });
+        document.getElementById('pop-name').innerText = item.ItemName;
+        document.getElementById('pop-cf').innerText = `PACKING CF: ${item.CF}`;
+        const grid = document.getElementById('pop-grid');
+        grid.innerHTML = `
+          <div class="flex justify-between py-2 border-b border-slate-50 dark:border-slate-800 text-[10px] font-bold uppercase"><span class="text-dim">Barcode</span><span class="dark:text-white">${item.ItemBarCode}</span></div>
+          <div class="flex justify-between py-2 border-b border-slate-50 dark:border-slate-800 text-[10px] font-bold uppercase"><span class="text-dim">Cost Price</span><span class="text-blue-500">${item.CostPrice}</span></div>
+          <div class="flex justify-between py-2 border-b border-slate-50 dark:border-slate-800 text-[10px] font-bold uppercase"><span class="text-dim">MRP Rate</span><span class="dark:text-white">${item.MRP}</span></div>
+          <div class="flex justify-between py-2 border-b border-slate-50 dark:border-slate-800 text-[10px] font-bold uppercase"><span class="text-dim">Live Stock</span><span class="text-green-500">${calcStock}</span></div>
+        `;
         document.getElementById('item-modal').classList.add('active');
       },
       closeModal: () => document.getElementById('item-modal').classList.remove('active')
@@ -262,15 +249,16 @@
 
     function parseCSV(t) {
       const lines = t.split(/\r?\n/);
-      const h = lines[0].split(',');
+      const h = lines[0].split(',').map(s => s.trim());
       return lines.slice(1).filter(l => l).map(line => {
         const v = line.split(',');
-        let o = {}; h.forEach((head, i) => o[head.trim()] = v[i]?.trim());
+        let o = {}; h.forEach((head, i) => o[head] = v[i]?.trim());
         return o;
       });
     }
 
     sync();
+    lucide.createIcons();
   </script>
 </body>
 </html>
