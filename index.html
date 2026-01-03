@@ -2,188 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-  />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+
   <title>K MART AL RAFFA - Item Master</title>
 
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f7f8fa" />
-  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000" />
-  <link rel="apple-touch-icon" href="icon-192.jpeg" />
-  <link rel="icon" type="image/png" href="icon-512.png" />
-
+  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- QR Scanner -->
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+  <!-- Screenshot -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
-  <style>
-    /* Global typography, selection, tap */
-    body {
-      -webkit-user-select: none;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-        Arial, sans-serif;
-      background: #f7f8fa;
-    }
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
 
-    @media (prefers-color-scheme: dark) {
-      body {
-        background: #050509;
-      }
-    }
-
-    /* Smooth theme transitions */
-    * {
-      transition:
-        background-color 0.3s ease,
-        color 0.3s ease,
-        border-color 0.3s ease,
-        box-shadow 0.3s ease;
-    }
-
-    /* Minimal custom scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #f3f4f6;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #9ca3af;
-      border-radius: 3px;
-    }
-    @media (prefers-color-scheme: dark) {
-      ::-webkit-scrollbar-track {
-        background: #000000;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #4b5563;
-      }
-    }
-
-    /* Fade-in animation */
-    .fade-in {
-      animation: fadeIn 0.3s ease-out forwards;
-    }
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* Premium cards (light + dark) */
-    .glass-card {
-      background: rgba(255, 255, 255, 0.95);
-      border: 1px solid rgba(229, 231, 235, 0.9);
-      box-shadow:
-        0 18px 45px rgba(15, 23, 42, 0.15),
-        0 1px 0 rgba(255, 255, 255, 0.4);
-      backdrop-filter: blur(14px);
-    }
-    @media (prefers-color-scheme: dark) {
-      .glass-card {
-        background: rgba(15, 23, 42, 0.98);
-        border: 1px solid rgba(31, 41, 55, 0.9);
-        box-shadow:
-          0 20px 60px rgba(0, 0, 0, 0.7),
-          0 0 0 1px rgba(148, 163, 184, 0.12);
-        backdrop-filter: blur(18px);
-      }
-    }
-
-    /* Header gradient */
-    .header-gradient {
-      background: radial-gradient(circle at 0% 0%, #e5f3ff 0, #ffffff 38%, #eef2ff 100%);
-    }
-    @media (prefers-color-scheme: dark) {
-      .header-gradient {
-        background: radial-gradient(circle at 0% 0%, #1f2937 0, #020617 45%, #020617 100%);
-      }
-    }
-
-    /* Scanner viewport */
-    #reader-container {
-      position: relative;
-      width: 100%;
-      height: 220px;
-      overflow: hidden;
-      border-radius: 1.5rem;
-      border: 3px solid #111827;
-      background: #000;
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
-    }
-    #reader {
-      width: 100%;
-      height: 100%;
-    }
-    #reader video {
-      width: 100% !important;
-      height: 220px !important;
-      object-fit: cover !important;
-    }
-
-    /* Scanner overlay */
-    .scan-overlay {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 80%;
-      height: 100px;
-      border: 2px solid rgba(255, 255, 255, 0.5);
-      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
-      border-radius: 16px;
-      pointer-events: none;
-      z-index: 10;
-    }
-    .scan-line {
-      width: 100%;
-      height: 2px;
-      background: #ef4444;
-      position: absolute;
-      top: 0;
-      box-shadow: 0 0 15px 2px #ef4444;
-      animation: scanMove 2s infinite linear;
-    }
-    @keyframes scanMove {
-      0% {
-        top: 0;
-      }
-      50% {
-        top: 100%;
-      }
-      100% {
-        top: 0;
-      }
-    }
-
-    /* Remove default focus outline on inputs */
-    input:focus {
-      outline: none;
-    }
-
-    /* Modal overlay */
-    .modal-overlay {
-      background: rgba(15, 23, 42, 0.7);
-      backdrop-filter: blur(10px);
-    }
-
-    /* Popup card shadow */
-    .popup-card {
-      box-shadow:
-        0 18px 45px rgba(15, 23, 42, 0.6),
-        0 0 0 1px rgba(148, 163, 184, 0.25);
-    }
-  </style>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#000000" />
+  <link rel="apple-touch-icon" href="icon-192.jpeg" />
 </head>
 
 <body class="min-h-screen p-3 md:p-6 pb-24 transition-colors duration-500">
@@ -191,915 +33,194 @@
   <div class="max-w-lg mx-auto space-y-5">
 
     <!-- HEADER -->
-    <header
-      class="header-gradient p-4 rounded-[2rem] shadow-sm border border-slate-100 dark:border-neutral-800 flex items-center gap-4">
-      <div
-        class="p-1 rounded-2xl border-2 border-slate-800 dark:border-neutral-700 shadow-inner bg-slate-50 dark:bg-neutral-800">
-        <img
-          src="icon-192.jpeg"
-          id="app-logo"
-          class="w-12 h-12 rounded-xl object-cover"
-          alt="K Mart Logo"
-        />
+    <header class="header-gradient p-4 rounded-[2rem] shadow-sm border border-slate-100 dark:border-neutral-800 flex items-center gap-4">
+      <div class="p-1 rounded-2xl border-2 border-slate-800 dark:border-neutral-700 shadow-inner bg-slate-50 dark:bg-neutral-800">
+        <img src="icon-192.jpeg" id="app-logo" class="w-12 h-12 rounded-xl object-cover" />
       </div>
       <div class="flex-grow">
-        <h1 class="font-black text-2xl tracking-tighter text-slate-900 dark:text-white">
-          K MART
-        </h1>
-        <div class="flex items-center gap-2">
-          <span
-            class="text-[10px] font-black text-gray-400 dark:text-neutral-500 uppercase tracking-widest"
-            >Al Raffa • Item Master</span
-          >
-        </div>
+        <h1 class="font-black text-2xl tracking-tighter text-slate-900 dark:text-white">K MART</h1>
+        <span class="text-[10px] font-black text-gray-400 dark:text-neutral-500 uppercase tracking-widest">
+          Al Raffa • Item Master
+        </span>
       </div>
     </header>
 
     <!-- Hidden config -->
     <div id="settings-panel" class="hidden">
-      <input
-        id="sheet-id"
-        type="text"
-        value="1eEFtb7wxOOLw-TFTf_NvSFq1VQy1qYlMoVmiZkFgUys"
-      />
+      <input id="sheet-id" type="text" value="1eEFtb7wxOOLw-TFTf_NvSFq1VQy1qYlMoVmiZkFgUys" />
       <input id="gid-id" type="text" value="710656272" />
     </div>
 
     <!-- STATUS BAR -->
     <div class="flex justify-between items-center px-2">
-      <div
-        id="status-pill"
-        class="bg-white/90 dark:bg-neutral-900/90 px-4 py-2 rounded-full border border-slate-200 dark:border-neutral-800 shadow-sm flex items-center gap-2 transition-all duration-300"
-      >
-        <span
-          id="status-dot"
-          class="w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse"
-        ></span>
-        <span
-          id="status-text"
-          class="text-xs font-bold text-slate-600 dark:text-neutral-400 italic"
-          >Initializing…</span
-        >
+      <div id="status-pill"
+           class="bg-white/90 dark:bg-neutral-900/90 px-4 py-2 rounded-full border border-slate-200 dark:border-neutral-800 shadow-sm flex items-center gap-2">
+        <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse"></span>
+        <span id="status-text" class="text-xs font-black text-slate-600 dark:text-neutral-400 italic">Initializing…</span>
       </div>
 
       <div id="last-update-container" class="hidden flex flex-col items-end px-1">
-        <span
-          class="text-[9px] uppercase font-black text-gray-400 dark:text-neutral-600 tracking-tighter leading-none"
-          >Last Sync</span
-        >
-        <span
-          id="last-update-time"
-          class="text-[11px] font-bold text-slate-500 dark:text-neutral-400 font-mono"
-          >--:--</span
-        >
+        <span class="text-[9px] uppercase font-black text-gray-400 dark:text-neutral-600 tracking-tighter leading-none">Last Sync</span>
+        <span id="last-update-time" class="text-[11px] font-bold text-slate-500 dark:text-neutral-400 font-mono">--:--</span>
       </div>
     </div>
 
     <!-- CAMERA SCANNER -->
     <section id="reader-container" class="hidden fade-in">
       <div id="reader"></div>
-      <div class="scan-overlay">
-        <div class="scan-line"></div>
-      </div>
-      <button
-        onclick="stopCamera()"
-        class="absolute top-4 right-4 bg-black/60 backdrop-blur-md p-2.5 rounded-full text-white hover:bg-red-600 transition-colors z-20"
-      >
+      <div class="scan-overlay"><div class="scan-line"></div></div>
+      <button onclick="stopCamera()"
+              class="absolute top-4 right-4 bg-black/60 backdrop-blur-md p-2.5 rounded-full text-white hover:bg-red-600 transition-colors z-20">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
     </section>
 
-    <!-- MAIN SEARCH CARD -->
-    <main
-      class="glass-card p-6 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 dark:border-neutral-800 space-y-7"
-    >
-      <!-- Search block -->
+    <!-- SEARCH CARD -->
+    <main class="glass-card p-6 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-neutral-800 space-y-7">
       <div class="space-y-3">
-        <label
-          class="block text-[11px] font-black text-slate-400 dark:text-neutral-500 uppercase tracking-widest ml-1"
-          >Search</label
-        >
-        <div class="flex gap-3 items-center">
-          <div class="relative flex-grow group">
-            <div
-              class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-neutral-600 group-focus-within:text-slate-600 dark:group-focus-within:text-neutral-300 transition-colors flex items-center gap-1"
-            >
-              <i data-lucide="search" class="w-5 h-5"></i>
-            </div>
-            <input
-              id="unified-search-input"
-              type="text"
-              placeholder="Search by barcode or name…"
-              class="w-full pl-12 pr-24 py-4.5 text-lg border-2 border-slate-50 dark:border-neutral-800 bg-slate-50/70 dark:bg-neutral-950/80 dark:text-white rounded-2xl focus:border-slate-300 dark:focus:border-neutral-600 focus:bg-white dark:focus:bg-black transition-all placeholder:text-slate-300 dark:placeholder-neutral-700"
-              oninput="handleSearch()"
-            />
+        <label class="block text-[11px] font-black text-slate-400 dark:text-neutral-500 uppercase tracking-widest ml-1">
+          Search
+        </label>
+
+        <div class="flex items-center gap-3">
+          <div class="relative flex-grow">
+            <input id="unified-search-input"
+                   type="text"
+                   placeholder="Search by barcode or name…"
+                   class="w-full pl-12 pr-14 py-4.5 text-lg border-2 border-slate-50 dark:border-neutral-800 bg-slate-50/70 dark:bg-neutral-950/80 dark:text-white rounded-2xl focus:border-slate-300 dark:focus:border-neutral-600 transition-all"
+                   oninput="handleSearch()" />
+
+            <i data-lucide="search"
+               class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-neutral-600"></i>
           </div>
 
-          <!-- Camera -->
-          <button
-            id="camera-toggle-btn"
-            onclick="toggleCamera()"
-            class="bg-slate-900 dark:bg-neutral-800 text-white px-3 rounded-2xl hover:bg-slate-800 active:scale-90 transition-all shadow-lg shadow-slate-200 dark:shadow-none flex items-center justify-center"
-          >
+          <button id="camera-toggle-btn"
+                  onclick="toggleCamera()"
+                  class="bg-slate-900 dark:bg-neutral-800 text-white px-3 rounded-2xl hover:bg-slate-800 active:scale-90 transition">
             <i data-lucide="camera" class="w-6 h-6"></i>
           </button>
 
-          <!-- Voice -->
-          <button
-            id="voice-btn"
-            class="bg-slate-900 dark:bg-neutral-800 text-white px-3 rounded-2xl hover:bg-slate-800 active:scale-90 transition-all shadow-lg shadow-slate-200 dark:shadow-none flex items-center justify-center"
-          >
+          <button id="voice-btn"
+                  class="bg-slate-900 dark:bg-neutral-800 text-white px-3 rounded-2xl hover:bg-slate-800 active:scale-90 transition">
             <i data-lucide="mic" class="w-5 h-5"></i>
           </button>
         </div>
       </div>
     </main>
 
-    <!-- SINGLE RESULT CARD -->
+    <!-- RESULT CARD -->
     <div id="result-container" class="hidden space-y-3 fade-in">
-      <div
-        class="glass-card rounded-[2rem] shadow-xl border border-slate-200 dark:border-neutral-800 overflow-hidden"
-      >
-        <div
-          class="bg-slate-50/80 dark:bg-black/60 p-6 border-b border-slate-100 dark:border-neutral-800 flex items-center gap-4"
-        >
-          <div
-            class="bg-emerald-500 p-2.5 rounded-2xl text-white shadow-lg shadow-emerald-500/30"
-          >
+      <div class="glass-card rounded-[2rem] shadow-xl border border-slate-200 dark:border-neutral-800 overflow-hidden">
+        <div class="bg-slate-50/80 dark:bg-black/60 p-6 border-b border-slate-100 dark:border-neutral-800 flex items-center gap-4">
+          <div class="bg-emerald-500 p-2.5 rounded-2xl text-white shadow-lg">
             <i data-lucide="badge-check" class="w-6 h-6"></i>
           </div>
+
           <div class="flex-1">
-            <p
-              class="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.2em] mb-0.5"
-            >
-              Verified Item Group
-            </p>
-            <h2
-              id="result-title"
-              class="text-2xl font-black text-slate-900 dark:text-white leading-tight"
-            >
-              Product Name
-            </h2>
-            <p
-              id="result-subtitle"
-              class="text-[11px] text-slate-500 dark:text-neutral-400 mt-1"
-            >
-              <!-- summary like: 3 variants • CF-based stock -->
-            </p>
+            <h2 id="result-title" class="text-2xl font-black text-slate-900 dark:text-white"></h2>
+            <p id="result-subtitle" class="text-[11px] text-slate-500 dark:text-neutral-400 mt-1"></p>
           </div>
-          <button
-            id="open-group-popup-btn"
-            class="hidden md:inline-flex items-center gap-1 bg-slate-900 dark:bg-neutral-800 text-white text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-slate-800 active:scale-95 transition"
-          >
-            <i data-lucide="layers" class="w-4 h-4"></i>
-            Details
+
+          <button id="open-group-popup-btn"
+                  class="hidden md:inline-flex items-center gap-1 bg-slate-900 dark:bg-neutral-800 text-white text-xs font-semibold px-3 py-1.5 rounded-xl">
+            <i data-lucide="layers" class="w-4 h-4"></i> Details
           </button>
         </div>
-        <div id="result-details" class="p-6 divide-y divide-slate-100 dark:divide-neutral-800">
-          <!-- filled by JS -->
-        </div>
+
+        <div id="result-details" class="p-6 divide-y divide-slate-100 dark:divide-neutral-800"></div>
       </div>
     </div>
 
-    <!-- MATCH LIST (MULTIPLE ITEMS) -->
+    <!-- MULTIPLE MATCH LIST -->
     <div id="list-container" class="hidden fade-in">
-      <div
-        class="glass-card rounded-[2rem] shadow-sm border border-slate-100 dark:border-neutral-800 overflow-hidden"
-      >
+      <div class="glass-card rounded-[2rem] border border-slate-100 dark:border-neutral-800 overflow-hidden">
         <div id="match-list" class="divide-y divide-slate-50 dark:divide-neutral-800"></div>
       </div>
     </div>
 
     <!-- NO RESULT -->
     <div id="no-result" class="hidden fade-in">
-      <div
-        class="glass-card p-12 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-neutral-800 text-center space-y-4"
-      >
-        <div
-          class="bg-slate-50 dark:bg-neutral-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto shadow-inner"
-        >
-          <i
-            data-lucide="package-search"
-            class="text-slate-300 dark:text-neutral-600 w-10 h-10"
-          ></i>
+      <div class="glass-card p-12 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-neutral-800 text-center space-y-4">
+        <div class="bg-slate-50 dark:bg-neutral-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto">
+          <i data-lucide="package-search" class="text-slate-300 dark:text-neutral-600 w-10 h-10"></i>
         </div>
-        <div>
-          <h3 class="font-bold text-slate-800 dark:text-neutral-200">
-            No Matching Item Found
-          </h3>
-          <p class="text-sm text-slate-400 dark:text-neutral-500 mt-1 px-4">
-            No items match the barcode or name you entered.
-          </p>
-        </div>
+        <h3 class="font-bold text-slate-800 dark:text-neutral-200">No Matching Item Found</h3>
+        <p class="text-sm text-slate-400 dark:text-neutral-500 mt-1 px-4">
+          No items match the barcode or name you entered.
+        </p>
       </div>
     </div>
 
-    <!-- FOOTER BANNER -->
+    <!-- FOOTER -->
     <footer class="pt-2 pb-10">
-      <img
-        src="banner.png"
-        class="w-full rounded-3xl shadow-md border border-slate-200 dark:border-neutral-800 object-cover opacity-90 hover:opacity-100 transition-opacity"
-        alt="K Mart Banner"
-      />
+      <img src="banner.png"
+           class="w-full rounded-3xl shadow-md border border-slate-200 dark:border-neutral-800 object-cover opacity-90" />
     </footer>
   </div>
 
-  <!-- MODAL FOR GROUP / CF DETAILS -->
-  <div
-    id="item-modal"
-    class="fixed inset-0 z-40 hidden modal-overlay flex items-center justify-center p-4"
-  >
-    <div
-      class="popup-card max-w-md w-full rounded-3xl bg-white dark:bg-neutral-950 p-5 relative"
-    >
-      <!-- close button -->
-      <button
-        type="button"
-        onclick="closeItemModal()"
-        class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition"
-      >
+  <!-- POPUP MODAL -->
+  <div id="item-modal"
+       class="fixed inset-0 z-40 hidden modal-overlay flex items-center justify-center p-4">
+    <div class="popup-card max-w-md w-full rounded-3xl bg-white dark:bg-neutral-950 p-5 relative">
+
+      <button onclick="closeItemModal()"
+              class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
-      <!-- POPUP WRAPPER (for screenshot + layout stability) -->
-<div id="popup-card-wrapper" class="bg-white dark:bg-neutral-950 rounded-2xl p-4 space-y-4">
+      <!-- POPUP WRAPPER (for screenshot) -->
+      <div id="popup-card-wrapper" class="bg-white dark:bg-neutral-950 rounded-2xl p-4 space-y-4">
 
-  <!-- POPUP HEADER -->
-  <div class="flex items-start gap-3">
-    <div class="w-10 h-10 rounded-2xl bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
-      <i data-lucide="layers" class="w-5 h-5 text-white dark:text-slate-900"></i>
-    </div>
-    <div>
-      <h3 id="popup-title" class="text-lg font-extrabold text-slate-900 dark:text-slate-50">
-        Item Name
-      </h3>
-      <p id="popup-subtitle" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-        <!-- Filled by JS -->
-      </p>
-    </div>
-  </div>
+        <div class="flex items-start gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
+            <i data-lucide="layers" class="w-5 h-5 text-white dark:text-slate-900"></i>
+          </div>
 
-  <!-- SUMMARY BADGES -->
-  <div id="popup-summary" class="grid grid-cols-3 gap-2 text-xs text-slate-600 dark:text-slate-300">
-    <!-- Filled by JS -->
-  </div>
+          <div>
+            <h3 id="popup-title" class="text-lg font-extrabold text-slate-900 dark:text-slate-50"></h3>
+            <p id="popup-subtitle" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5"></p>
+          </div>
+        </div>
 
-  <!-- SCROLLABLE TABLE -->
-  <div class="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
-    <div class="overflow-x-auto">
-      <table class="min-w-[460px] w-full text-xs">
-        <thead class="bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-          <tr>
-            <th class="px-3 py-2 text-left">CF</th>
-            <th class="px-3 py-2 text-left">Barcode</th>
-            <th class="px-3 py-2 text-right">Cost</th>
-            <th class="px-3 py-2 text-right">MRP</th>
-            <th class="px-3 py-2 text-right">Stock</th>
-          </tr>
-        </thead>
-        <tbody id="popup-rows" class="divide-y divide-slate-100 dark:divide-slate-800">
-          <!-- Filled by JS -->
-        </tbody>
-      </table>
-    </div>
-  </div>
+        <div id="popup-summary"
+             class="grid grid-cols-3 gap-2 text-xs text-slate-600 dark:text-slate-300"></div>
 
-</div>
+        <div class="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="min-w-[460px] w-full text-xs">
+              <thead class="bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                <tr>
+                  <th class="px-3 py-2 text-left">CF</th>
+                  <th class="px-3 py-2 text-left">Barcode</th>
+                  <th class="px-3 py-2 text-right">Cost</th>
+                  <th class="px-3 py-2 text-right">MRP</th>
+                  <th class="px-3 py-2 text-right">Stock</th>
+                </tr>
+              </thead>
+              <tbody id="popup-rows"
+                     class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
 
+      </div>
 
-
-      <!-- Modal footer actions -->
       <div class="mt-4 flex justify-between items-center gap-2">
-        <button
-          type="button"
-          onclick="closeItemModal()"
-          class="flex-1 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-200 text-xs font-semibold py-2 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 transition"
-        >
+        <button onclick="closeItemModal()"
+                class="flex-1 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-200 text-xs font-semibold py-2 rounded-xl">
           Close
         </button>
-        <button
-          type="button"
-          id="share-btn"
-          class="flex-1 bg-blue-600 text-white text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-2 hover:bg-blue-700 active:scale-95 transition"
-        >
-          <i data-lucide="share-2" class="w-4 h-4"></i>
-          Share
+
+        <button id="share-btn"
+                class="flex-1 bg-blue-600 text-white text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-2">
+          <i data-lucide="share-2" class="w-4 h-4"></i> Share
         </button>
       </div>
+
     </div>
   </div>
 
-  <script>
-    /**
-     * GLOBAL APPLICATION STATE
-     */
-    let inventory = [];
-    let headers = [];
-    let html5QrCode = null;
-    let currentGroupRows = []; // rows for currently selected ItemName
-
-    // Initialize icons
-    lucide.createIcons();
-
-    window.onload = function () {
-      fetchData();
-
-      // PWA service worker
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker
-          .register("service-worker.js")
-          .then(() => console.log("K-Mart PWA is active"))
-          .catch((err) => console.error("Service Worker registration failed:", err));
-      }
-    };
-
-    /**
-     * CAMERA SYSTEM
-     */
-    function toggleCamera() {
-      const container = document.getElementById("reader-container");
-      if (!container.classList.contains("hidden")) {
-        stopCamera();
-      } else {
-        startCamera();
-      }
-    }
-
-    function startCamera() {
-      document.getElementById("reader-container").classList.remove("hidden");
-      const btn = document.getElementById("camera-toggle-btn");
-
-      btn.disabled = true;
-      btn.classList.add("opacity-50", "scale-95");
-
-      html5QrCode = new Html5Qrcode("reader");
-
-      const config = {
-        fps: 30,
-        qrbox: { width: 250, height: 120 },
-        aspectRatio: 1.0,
-        experimentalFeatures: { useBarCodeDetectorIfSupported: true },
-      };
-
-      html5QrCode
-        .start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure)
-        .catch((err) => {
-          console.error("Camera start failed:", err);
-          alert("Camera access is required to scan barcodes.");
-          stopCamera();
-        });
-    }
-
-    function stopCamera() {
-      if (html5QrCode) {
-        html5QrCode
-          .stop()
-          .then(() => {
-            html5QrCode.clear();
-            html5QrCode = null;
-          })
-          .catch((err) => console.warn("Camera stop warning:", err));
-      }
-
-      document.getElementById("reader-container").classList.add("hidden");
-      const btn = document.getElementById("camera-toggle-btn");
-
-      btn.disabled = false;
-      btn.classList.remove("opacity-50", "scale-95");
-    }
-
-    function onScanSuccess(decodedText) {
-      const input = document.getElementById("unified-search-input");
-      input.value = decodedText;
-      stopCamera();
-      handleSearch();
-
-      // Haptic feedback
-      if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-    }
-
-    function onScanFailure(error) {
-      // Normal scan noise / unused
-    }
-
-    /**
-     * DATA ENGINE — GOOGLE SHEETS
-     */
-    async function fetchData() {
-      const sheetId = document.getElementById("sheet-id").value;
-      const gid = document.getElementById("gid-id").value;
-      const statusText = document.getElementById("status-text");
-      const statusDot = document.getElementById("status-dot");
-      const statusPill = document.getElementById("status-pill");
-
-      statusText.innerText = "Syncing…";
-      statusDot.className = "w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse";
-
-      try {
-        const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
-        const response = await fetch(csvUrl);
-
-        if (!response.ok) throw new Error("Sync Failed");
-
-        const rawText = await response.text();
-        const data = parseCSV(rawText);
-
-        if (data.length === 0) throw new Error("No Data Returned");
-
-        inventory = data;
-        headers = Object.keys(data[0]);
-
-        // Online state
-        statusText.innerHTML = `Online • ${inventory.length.toLocaleString()} Items`;
-        statusText.className =
-          "text-xs font-black text-slate-800 dark:text-gray-200";
-        statusDot.className =
-          "w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.6)]";
-        statusPill.className =
-          "bg-green-50 dark:bg-green-950/40 px-4 py-2 rounded-full border border-green-200 dark:border-green-900 shadow-sm flex items-center gap-2 transition-all duration-500";
-
-        // Timestamp
-        const now = new Date();
-        const timeOptions = { hour: "2-digit", minute: "2-digit", hour12: true };
-        const dateOptions = { day: "2-digit", month: "short" };
-
-        document.getElementById("last-update-time").innerText =
-          `${now.toLocaleDateString("en-GB", dateOptions)}, ${now.toLocaleTimeString(
-            "en-GB",
-            timeOptions
-          )}`;
-        document
-          .getElementById("last-update-container")
-          .classList.remove("hidden");
-      } catch (err) {
-        console.error("Sync error:", err);
-        statusText.innerText = "Connection Error";
-        statusDot.className = "w-2.5 h-2.5 rounded-full bg-red-500";
-        statusPill.className =
-          "bg-red-50 dark:bg-red-950/20 px-4 py-2 rounded-full border border-red-200 dark:border-red-900 shadow-sm flex items-center gap-2";
-      }
-    }
-
-    /**
-     * SEARCH ENGINE
-     * Single box: barcode (numeric) or name (text)
-     */
-    function handleSearch() {
-      const term = document
-        .getElementById("unified-search-input")
-        .value.trim()
-        .toLowerCase();
-
-      const resCon = document.getElementById("result-container");
-      const listCon = document.getElementById("list-container");
-      const noRes = document.getElementById("no-result");
-
-      resCon.classList.add("hidden");
-      listCon.classList.add("hidden");
-      noRes.classList.add("hidden");
-
-      if (!term) return;
-      if (!inventory || inventory.length === 0) return;
-
-      let matchedRows = [];
-
-      // If numeric -> barcode search
-      if (/^\d+$/.test(term)) {
-        matchedRows = inventory.filter((row) => {
-          const barcode = String(row["ItemBarCode"] || "").toLowerCase();
-          return barcode === term;
-        });
-      } else {
-        // Name search
-        if (term.length < 3) return;
-        const tokens = term.split(/\s+/).filter(Boolean);
-
-        matchedRows = inventory.filter((row) => {
-          const name = String(row["ItemName"] || "").toLowerCase();
-          return tokens.every((t) => name.includes(t));
-        });
-      }
-
-      if (matchedRows.length === 0) {
-        noRes.classList.remove("hidden");
-        return;
-      }
-
-      // Group by ItemName
-      const groups = {};
-      matchedRows.forEach((row) => {
-        const name = String(row["ItemName"] || "").trim();
-        if (!name) return;
-        if (!groups[name]) groups[name] = [];
-        groups[name].push(row);
-      });
-
-      const groupNames = Object.keys(groups);
-
-      if (groupNames.length === 1) {
-        // Single item group
-        const groupRows = completeGroupByName(groupNames[0]);
-        currentGroupRows = groupRows;
-        renderSingleGroup(groupRows);
-      } else {
-        // Multiple item names — show list
-        renderGroupList(groups);
-      }
-    }
-
-    /**
-     * Ensure full group for given ItemName (include all rows from inventory with same ItemName)
-     */
-    function completeGroupByName(itemName) {
-      return inventory.filter(
-        (row) => String(row["ItemName"] || "").trim() === itemName
-      );
-    }
-
-    /**
-     * RENDER: Single item group summary card
-     */
-    function renderSingleGroup(groupRows) {
-      if (!groupRows || groupRows.length === 0) return;
-
-      const container = document.getElementById("result-container");
-      const titleEl = document.getElementById("result-title");
-      const subtitleEl = document.getElementById("result-subtitle");
-      const detailsEl = document.getElementById("result-details");
-      const openPopupBtn = document.getElementById("open-group-popup-btn");
-
-      container.classList.remove("hidden");
-
-      const itemName = String(groupRows[0]["ItemName"] || "").trim();
-
-      // Find main CF=1 row
-      const mainRow =
-        groupRows.find(
-          (r) => String(r["CF"] || "").trim() === "1"
-        ) || groupRows[0];
-
-      const variantsCount = groupRows.length;
-      const mainBarcode = String(mainRow["ItemBarCode"] || "").trim();
-      const mainCost = String(mainRow["CostPrice"] || "").trim();
-      const mainMrp = String(mainRow["MRP"] || "").trim();
-      const mainStockRaw = Number(mainRow["LiveStock"] || "0") || 0;
-
-      titleEl.innerText = itemName;
-      subtitleEl.innerText = `${variantsCount} variant${
-        variantsCount > 1 ? "s" : ""
-      } • CF-based stock from main unit`;
-
-      // Build detail rows: Cost, MRP, Stock, Group
-      let detailsHtml = "";
-
-      detailsHtml += `
-        <div class="py-4 flex justify-between items-center gap-4">
-          <span class="text-[10px] font-black text-slate-400 dark:text-neutral-600 uppercase tracking-widest pt-1.5">Barcode</span>
-          <div class="text-right">
-            <span class="bg-slate-100 dark:bg-neutral-800 px-3 py-1 rounded-lg border border-slate-200 dark:border-neutral-700 text-slate-800 dark:text-neutral-200 font-mono text-xs">${mainBarcode || "-"}</span>
-          </div>
-        </div>
-      `;
-
-      detailsHtml += `
-        <div class="py-4 flex justify-between items-center gap-4">
-          <span class="text-[10px] font-black text-slate-400 dark:text-neutral-600 uppercase tracking-widest pt-1.5">Cost</span>
-          <div class="text-right">
-            <span class="text-xl font-black text-slate-900 dark:text-white tracking-tight">${mainCost || "-"}</span>
-          </div>
-        </div>
-      `;
-
-      detailsHtml += `
-        <div class="py-4 flex justify-between items-center gap-4">
-          <span class="text-[10px] font-black text-slate-400 dark:text-neutral-600 uppercase tracking-widest pt-1.5">MRP</span>
-          <div class="text-right">
-            <span class="text-xl font-black text-slate-900 dark:text-white tracking-tight">${mainMrp || "-"}</span>
-          </div>
-        </div>
-      `;
-
-      detailsHtml += `
-        <div class="py-4 flex justify-between items-center gap-4">
-          <span class="text-[10px] font-black text-slate-400 dark:text-neutral-600 uppercase tracking-widest pt-1.5">Main Stock (CF=1)</span>
-          <div class="text-right text-base text-slate-700 dark:text-neutral-300 font-bold">
-            ${mainStockRaw}
-          </div>
-        </div>
-      `;
-
-      const groupName = String(mainRow["GroupName"] || "").trim();
-      if (groupName) {
-        detailsHtml += `
-          <div class="py-4 flex justify-between items-center gap-4">
-            <span class="text-[10px] font-black text-slate-400 dark:text-neutral-600 uppercase tracking-widest pt-1.5">Group</span>
-            <div class="text-right text-xs text-slate-700 dark:text-neutral-300 font-semibold">
-              ${groupName}
-            </div>
-          </div>
-        `;
-      }
-
-      detailsEl.innerHTML = detailsHtml;
-      openPopupBtn.classList.remove("hidden");
-      openPopupBtn.onclick = () => openItemModal(groupRows);
-
-      lucide.createIcons();
-    }
-
-    /**
-     * RENDER: Multiple item groups as a list
-     */
-    function renderGroupList(groups) {
-      const container = document.getElementById("list-container");
-      const listWrap = document.getElementById("match-list");
-      const resCon = document.getElementById("result-container");
-
-      resCon.classList.add("hidden");
-      container.classList.remove("hidden");
-      listWrap.innerHTML = "";
-
-      Object.keys(groups).forEach((name) => {
-        const rows = completeGroupByName(name);
-        const mainRow =
-          rows.find(
-            (r) => String(r["CF"] || "").trim() === "1"
-          ) || rows[0];
-
-        const barcode = String(mainRow["ItemBarCode"] || "").trim();
-        const cost = String(mainRow["CostPrice"] || "").trim();
-        const mrp = String(mainRow["MRP"] || "").trim();
-
-        const rowDiv = document.createElement("div");
-        rowDiv.className =
-          "p-5 flex justify-between items-center hover:bg-slate-50 dark:hover:bg-neutral-800/50 active:bg-slate-100 cursor-pointer transition-colors group";
-
-        rowDiv.innerHTML = `
-          <div class="space-y-1">
-            <p class="font-bold text-slate-800 dark:text-neutral-200 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
-              ${name}
-            </p>
-            <p class="text-[11px] font-mono font-medium text-slate-400 dark:text-neutral-600">
-              ${barcode || "-"}
-            </p>
-            <p class="text-[11px] text-slate-400 dark:text-neutral-500">
-              Cost: ${cost || "-"} • MRP: ${mrp || "-"}
-            </p>
-          </div>
-          <div class="text-slate-300 dark:text-neutral-700 group-hover:text-slate-500 transition-all">
-            <i data-lucide="chevron-right" class="w-5 h-5"></i>
-          </div>
-        `;
-
-        rowDiv.onclick = () => {
-          currentGroupRows = rows;
-          renderSingleGroup(rows);
-          document.getElementById("list-container").classList.add("hidden");
-        };
-
-        listWrap.appendChild(rowDiv);
-      });
-
-      lucide.createIcons();
-    }
-
-    /**
-     * MODAL OPEN / CLOSE
-     */
-    function openItemModal(groupRows) {
-      if (!groupRows || groupRows.length === 0) return;
-
-      currentGroupRows = groupRows;
-
-      const modal = document.getElementById("item-modal");
-      const titleEl = document.getElementById("popup-title");
-      const subtitleEl = document.getElementById("popup-subtitle");
-      const summaryEl = document.getElementById("popup-summary");
-      const rowsEl = document.getElementById("popup-rows");
-
-      const itemName = String(groupRows[0]["ItemName"] || "").trim();
-      const mainRow =
-        groupRows.find(
-          (r) => String(r["CF"] || "").trim() === "1"
-        ) || groupRows[0];
-      const mainStock = Number(mainRow["LiveStock"] || "0") || 0;
-
-      const mainCost = String(mainRow["CostPrice"] || "").trim();
-      const mainMrp = String(mainRow["MRP"] || "").trim();
-      const groupName = String(mainRow["GroupName"] || "").trim();
-
-      titleEl.innerText = itemName;
-      subtitleEl.innerText = `${groupRows.length} variant${
-        groupRows.length > 1 ? "s" : ""
-      } • CF-based stock from main unit`;
-
-      // Summary badges
-      summaryEl.innerHTML = `
-        <div class="rounded-xl bg-slate-50 dark:bg-slate-900 px-3 py-2">
-          <div class="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Main Stock</div>
-          <div class="mt-0.5 text-sm font-bold text-slate-800 dark:text-slate-100">${mainStock}</div>
-        </div>
-        <div class="rounded-xl bg-slate-50 dark:bg-slate-900 px-3 py-2">
-          <div class="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Cost / MRP</div>
-          <div class="mt-0.5 text-sm font-bold text-slate-800 dark:text-slate-100">${mainCost || "-"} / ${mainMrp || "-"}</div>
-        </div>
-        <div class="rounded-xl bg-slate-50 dark:bg-slate-900 px-3 py-2">
-          <div class="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Group</div>
-          <div class="mt-0.5 text-[11px] font-semibold text-slate-700 dark:text-slate-200">${groupName || "—"}</div>
-        </div>
-      `;
-
-      // Table rows for each CF
-      rowsEl.innerHTML = "";
-      groupRows.forEach((row) => {
-        const cf = Number(row["CF"] || "0") || 0;
-        const barcode = String(row["ItemBarCode"] || "").trim();
-        const cost = String(row["CostPrice"] || "").trim();
-        const mrp = String(row["MRP"] || "").trim();
-
-        let stockDisplay = "";
-        if (cf === 1) {
-          stockDisplay = mainStock.toString();
-        } else if (cf > 0) {
-          const derived = mainStock / cf;
-          stockDisplay = derived % 1 === 0 ? derived.toString() : derived.toFixed(2);
-        } else {
-          stockDisplay = "-";
-        }
-
-        const tr = document.createElement("tr");
-        tr.className =
-  "hover:bg-slate-50 dark:hover:bg-slate-900/70 transition-colors whitespace-nowrap";
-
-        tr.innerHTML = `
-          <td class="px-3 py-2 text-slate-700 dark:text-slate-200">${cf || "-"}</td>
-          <td class="px-3 py-2 text-slate-600 dark:text-slate-300 font-mono text-[11px]">${barcode || "-"}</td>
-          <td class="px-3 py-2 text-right text-slate-700 dark:text-slate-200">${cost || "-"}</td>
-          <td class="px-3 py-2 text-right text-slate-700 dark:text-slate-200">${mrp || "-"}</td>
-          <td class="px-3 py-2 text-right text-slate-800 dark:text-slate-100 font-semibold">${stockDisplay}</td>
-        `;
-        rowsEl.appendChild(tr);
-      });
-
-      modal.classList.remove("hidden");
-      lucide.createIcons();
-    }
-
-    function closeItemModal() {
-      document.getElementById("item-modal").classList.add("hidden");
-    }
-
-    /**
- * SHARE POPUP AS IMAGE (SIMPLIFIED + SAFE)
- */
-document.getElementById("share-btn").onclick = async () => {
-  const card = document.getElementById("popup-card-wrapper");
-  if (!card) return;
-
-  try {
-    const canvas = await html2canvas(card, {
-      scale: window.devicePixelRatio > 2 ? 1.5 : 2,
-      backgroundColor: null
-    });
-
-    // 1) Quick visual check – open image in a new tab
-    //    (You can comment this out later)
-    const previewUrl = canvas.toDataURL("image/png");
-    // window.open(previewUrl, "_blank"); // uncomment if you want to test preview
-
-    // 2) Try file sharing if supported
-    canvas.toBlob(async (blob) => {
-      if (!blob) {
-        alert("Could not create image blob.");
-        return;
-      }
-
-      const file = new File([blob], "item-details.png", { type: "image/png" });
-
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({
-            title: "Item Details",
-            files: [file]
-          });
-          return;
-        } catch (err) {
-          console.log("Share cancelled or failed:", err);
-        }
-      }
-
-      // 3) Fallback: just download the image if share not supported
-      const a = document.createElement("a");
-      a.href = previewUrl;
-      a.download = "item-details.png";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-
-      if (!navigator.share) {
-        alert("This device cannot open the share sheet. Image downloaded instead.");
-      }
-    });
-  } catch (err) {
-    console.error("Share error:", err);
-    alert("Image creation failed. Check console for details.");
-  }
-};
-
-
-    /**
-     * CSV PARSER
-     */
-    function parseCSV(text) {
-      const lines = text.split(/\r?\n/);
-      if (lines.length < 2) return [];
-
-      const headArray = splitCSVLine(lines[0]);
-      const dataStore = [];
-
-      for (let i = 1; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (!line) continue;
-
-        const valArray = splitCSVLine(line);
-        const itemObj = {};
-
-        headArray.forEach((h, idx) => {
-          itemObj[h.trim()] = valArray[idx] ? valArray[idx].trim() : "";
-        });
-
-        dataStore.push(itemObj);
-      }
-      return dataStore;
-    }
-
-    function splitCSVLine(line) {
-      const parts = [];
-      let current = "";
-      let insideQuotes = false;
-
-      for (let char of line) {
-        if (char === '"') {
-          insideQuotes = !insideQuotes;
-        } else if (char === "," && !insideQuotes) {
-          parts.push(current);
-          current = "";
-        } else {
-          current += char;
-        }
-      }
-      parts.push(current);
-      return parts;
-    }
-
-    /**
-     * THEME-AWARE LOGO
-     */
-    const logoImg = document.getElementById("app-logo");
-    const darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
-
-    function setLogo(isDark) {
-      logoImg.src = isDark ? "icon-dark-512.png" : "icon-512.png";
-    }
-
-    setLogo(darkModeQuery.matches);
-    darkModeQuery.addEventListener("change", (e) => setLogo(e.matches));
-
-    /**
-     * VOICE SEARCH ENGINE
-     */
-    const voiceBtn = document.getElementById("voice-btn");
-    const searchInput = document.getElementById("unified-search-input");
-    let recognition = null;
-
-    if ("webkitSpeechRecognition" in window) {
-      recognition = new webkitSpeechRecognition();
-      recognition.lang = "en-US";
-      recognition.continuous = false;
-      recognition.interimResults = false;
-
-      recognition.onstart = () => {
-        voiceBtn.classList.add("bg-red-600");
-      };
-
-      recognition.onend = () => {
-        voiceBtn.classList.remove("bg-red-600");
-      };
-
-      recognition.onresult = (event) => {
-        const text = event.results[0][0].transcript;
-        searchInput.value = text;
-        handleSearch();
-      };
-    }
-
-    voiceBtn.onclick = () => {
-      if (!recognition) {
-        alert("Voice search not supported on this browser.");
-        return;
-      }
-      recognition.start();
-    };
-  </script>
+  <!-- JS -->
+  <script src="app.js"></script>
 </body>
 </html>
