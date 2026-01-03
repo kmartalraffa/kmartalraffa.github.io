@@ -1,0 +1,226 @@
+/* --------------------------------------------------
+   GLOBAL BASE STYLES
+-------------------------------------------------- */
+
+body {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  background: #f7f8fa;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #050509;
+  }
+}
+
+/* Smooth transitions */
+* {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+/* --------------------------------------------------
+   SCROLLBAR
+-------------------------------------------------- */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 3px;
+}
+
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-track {
+    background: #000000;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #4b5563;
+  }
+}
+
+/* --------------------------------------------------
+   ANIMATIONS
+-------------------------------------------------- */
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --------------------------------------------------
+   GLASS CARD (light + dark)
+-------------------------------------------------- */
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(229, 231, 235, 0.9);
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.15),
+    0 1px 0 rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(14px);
+}
+
+@media (prefers-color-scheme: dark) {
+  .glass-card {
+    background: rgba(15, 23, 42, 0.98);
+    border: 1px solid rgba(31, 41, 55, 0.9);
+    box-shadow:
+      0 20px 60px rgba(0, 0, 0, 0.7),
+      0 0 0 1px rgba(148, 163, 184, 0.12);
+    backdrop-filter: blur(18px);
+  }
+}
+
+/* --------------------------------------------------
+   HEADER GRADIENT
+-------------------------------------------------- */
+
+.header-gradient {
+  background: radial-gradient(circle at 0% 0%, #e5f3ff 0, #ffffff 38%, #eef2ff 100%);
+}
+
+@media (prefers-color-scheme: dark) {
+  .header-gradient {
+    background: radial-gradient(circle at 0% 0%, #1f2937 0, #020617 45%, #020617 100%);
+  }
+}
+
+/* --------------------------------------------------
+   CAMERA SCANNER
+-------------------------------------------------- */
+
+#reader-container {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  border: 3px solid #111827;
+  background: #000;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
+}
+
+#reader {
+  width: 100%;
+  height: 100%;
+}
+
+#reader video {
+  width: 100% !important;
+  height: 220px !important;
+  object-fit: cover !important;
+}
+
+/* Scanner overlay */
+.scan-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  height: 100px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+  border-radius: 16px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.scan-line {
+  width: 100%;
+  height: 2px;
+  background: #ef4444;
+  position: absolute;
+  top: 0;
+  box-shadow: 0 0 15px 2px #ef4444;
+  animation: scanMove 2s infinite linear;
+}
+
+@keyframes scanMove {
+  0% {
+    top: 0;
+  }
+  50% {
+    top: 100%;
+  }
+  100% {
+    top: 0;
+  }
+}
+
+/* --------------------------------------------------
+   INPUT FIXES
+-------------------------------------------------- */
+
+input:focus {
+  outline: none;
+}
+
+#unified-search-input {
+  font-size: 18px;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --------------------------------------------------
+   MODAL OVERLAY
+-------------------------------------------------- */
+
+.modal-overlay {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(10px);
+}
+
+/* Popup card shadow */
+.popup-card {
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.6),
+    0 0 0 1px rgba(148, 163, 184, 0.25);
+}
+
+/* --------------------------------------------------
+   TABLE FIXES (scrollable CF table)
+-------------------------------------------------- */
+
+#popup-card-wrapper table {
+  border-collapse: collapse;
+}
+
+#popup-card-wrapper th,
+#popup-card-wrapper td {
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------
+   DARK MODE LOGO SWITCH
+-------------------------------------------------- */
+
+@media (prefers-color-scheme: dark) {
+  #app-logo {
+    filter: brightness(0.9);
+  }
+}
