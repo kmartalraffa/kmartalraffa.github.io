@@ -342,6 +342,7 @@ function openItemModal(groupRows) {
 `;
 
 
+
     rowsEl.appendChild(tr);
   });
 
