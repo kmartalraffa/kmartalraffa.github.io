@@ -456,26 +456,28 @@
         </div>
 
         <div
-          class="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden"
-        >
-          <table class="w-full text-xs">
-            <thead
-              class="bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 uppercase tracking-wide"
-            >
-              <tr>
-                <th class="px-3 py-2 text-left">CF</th>
-                <th class="px-3 py-2 text-left">Barcode</th>
-                <th class="px-3 py-2 text-right">Cost</th>
-                <th class="px-3 py-2 text-right">MRP</th>
-                <th class="px-3 py-2 text-right">Stock</th>
-              </tr>
-            </thead>
-            <tbody id="popup-rows" class="divide-y divide-slate-100 dark:divide-slate-800">
-              <!-- rows by JS -->
-            </tbody>
-          </table>
-        </div>
-      </div>
+  class="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden"
+>
+  <div class="overflow-x-auto">
+    <table class="min-w-[420px] w-full text-xs">
+      <thead
+        class="bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 uppercase tracking-wide"
+      >
+        <tr>
+          <th class="px-3 py-2 text-left">CF</th>
+          <th class="px-3 py-2 text-left">Barcode</th>
+          <th class="px-3 py-2 text-right">Cost</th>
+          <th class="px-3 py-2 text-right">MRP</th>
+          <th class="px-3 py-2 text-right">Stock</th>
+        </tr>
+      </thead>
+      <tbody id="popup-rows" class="divide-y divide-slate-100 dark:divide-slate-800">
+        <!-- rows by JS -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
 
       <!-- Modal footer actions -->
       <div class="mt-4 flex justify-between items-center gap-2">
@@ -938,7 +940,8 @@
 
         const tr = document.createElement("tr");
         tr.className =
-          "hover:bg-slate-50 dark:hover:bg-slate-900/70 transition-colors";
+  "hover:bg-slate-50 dark:hover:bg-slate-900/70 transition-colors whitespace-nowrap";
+
         tr.innerHTML = `
           <td class="px-3 py-2 text-slate-700 dark:text-slate-200">${cf || "-"}</td>
           <td class="px-3 py-2 text-slate-600 dark:text-slate-300 font-mono text-[11px]">${barcode || "-"}</td>
