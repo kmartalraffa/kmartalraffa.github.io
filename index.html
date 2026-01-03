@@ -421,65 +421,51 @@
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
-      <!-- Capture area -->
-<div id="popup-card-wrapper" class="bg-white dark:bg-neutral-950 rounded-2xl p-4">
-  <div id="popup-card" class="space-y-4">
-    ...
+      <!-- POPUP WRAPPER (for screenshot + layout stability) -->
+<div id="popup-card-wrapper" class="bg-white dark:bg-neutral-950 rounded-2xl p-4 space-y-4">
+
+  <!-- POPUP HEADER -->
+  <div class="flex items-start gap-3">
+    <div class="w-10 h-10 rounded-2xl bg-slate-900 dark:bg-slate-100 flex items-center justify-center">
+      <i data-lucide="layers" class="w-5 h-5 text-white dark:text-slate-900"></i>
+    </div>
+    <div>
+      <h3 id="popup-title" class="text-lg font-extrabold text-slate-900 dark:text-slate-50">
+        Item Name
+      </h3>
+      <p id="popup-subtitle" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+        <!-- Filled by JS -->
+      </p>
+    </div>
   </div>
+
+  <!-- SUMMARY BADGES -->
+  <div id="popup-summary" class="grid grid-cols-3 gap-2 text-xs text-slate-600 dark:text-slate-300">
+    <!-- Filled by JS -->
+  </div>
+
+  <!-- SCROLLABLE TABLE -->
+  <div class="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="min-w-[460px] w-full text-xs">
+        <thead class="bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+          <tr>
+            <th class="px-3 py-2 text-left">CF</th>
+            <th class="px-3 py-2 text-left">Barcode</th>
+            <th class="px-3 py-2 text-right">Cost</th>
+            <th class="px-3 py-2 text-right">MRP</th>
+            <th class="px-3 py-2 text-right">Stock</th>
+          </tr>
+        </thead>
+        <tbody id="popup-rows" class="divide-y divide-slate-100 dark:divide-slate-800">
+          <!-- Filled by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
 </div>
 
-            class="w-10 h-10 rounded-2xl bg-slate-900 dark:bg-slate-100 flex items-center justify-center"
-          >
-            <i
-              data-lucide="layers"
-              class="w-5 h-5 text-white dark:text-slate-900"
-            ></i>
-          </div>
-          <div>
-            <h3
-              id="popup-title"
-              class="text-lg font-extrabold text-slate-900 dark:text-slate-50"
-            >
-              Item Name
-            </h3>
-            <p
-              id="popup-subtitle"
-              class="text-xs text-slate-500 dark:text-slate-400 mt-0.5"
-            >
-              <!-- e.g. 3 variants • CF based -->
-            </p>
-          </div>
-        </div>
-
-        <div
-          id="popup-summary"
-          class="grid grid-cols-3 gap-2 text-xs text-slate-600 dark:text-slate-300"
-        >
-          <!-- summary badges filled by JS -->
-        </div>
-
-        <div
-  class="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden"
->
-  <div class="overflow-x-auto">
-    <table class="min-w-[420px] w-full text-xs">
-      <thead
-        class="bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 uppercase tracking-wide"
-      >
-        <tr>
-          <th class="px-3 py-2 text-left">CF</th>
-          <th class="px-3 py-2 text-left">Barcode</th>
-          <th class="px-3 py-2 text-right">Cost</th>
-          <th class="px-3 py-2 text-right">MRP</th>
-          <th class="px-3 py-2 text-right">Stock</th>
-        </tr>
-      </thead>
-      <tbody id="popup-rows" class="divide-y divide-slate-100 dark:divide-slate-800">
-        <!-- rows by JS -->
-      </tbody>
-    </table>
-  </div>
-</div>
 
 
       <!-- Modal footer actions -->
