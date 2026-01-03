@@ -205,7 +205,8 @@ function renderSingleGroup(groupRows) {
   const mainRow =
     groupRows.find((r) => String(r["CF"]) === "1") || groupRows[0];
 
-  const mainStock = Number(mainRow["LiveStock"] || 0);
+  const mainStock = Number(mainRow["LiveStock"] || "0") || 0;
+
 
   titleEl.innerText = itemName;
   subtitleEl.innerText = `${groupRows.length} variants • CF-based stock`;
@@ -293,7 +294,8 @@ function openItemModal(groupRows) {
   const itemName = groupRows[0]["ItemName"];
   const mainRow =
     groupRows.find((r) => String(r["CF"]) === "1") || groupRows[0];
-  const mainStock = Number(mainRow["LiveStock"] || 0);
+  const mainStock = Number(mainRow["LiveStock"] || "0") || 0;
+
 
   titleEl.innerText = itemName;
   subtitleEl.innerText = `${groupRows.length} variants • CF-based stock`;
