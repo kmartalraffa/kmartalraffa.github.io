@@ -262,7 +262,7 @@ function renderGroupList(groups) {
 
     div.innerHTML = `
       <div>
-        <p class="font-bold">${name}</p>
+        <p class="font-bold text-slate-900 dark:text-slate-50">${name}</p>
         <p class="text-[11px] font-mono text-slate-400">${mainRow["ItemBarCode"]}</p>
       </div>
       <i data-lucide="chevron-right" class="w-5 h-5 text-slate-400"></i>
